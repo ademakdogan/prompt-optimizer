@@ -14,6 +14,8 @@ from prompt_optimizer.models.schemas import (
     ErrorFeedback,
     OptimizationResult,
     PromptHistory,
+    MentorPromptRequest,
+    GeneratedPrompt,
 )
 
 __all__ = [
@@ -22,4 +24,6 @@ __all__ = [
     "ErrorFeedback",
     "OptimizationResult",
     "PromptHistory",
+    "MentorPromptRequest",
+    "GeneratedPrompt",
 ]

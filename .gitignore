@@ -69,3 +69,4 @@ venv.bak/
 # uv
 .python-version
 uv.lock
+resources/pii/pii_backup
