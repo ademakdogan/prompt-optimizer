@@ -6,7 +6,7 @@ This module provides core functionality for:
 - Prompt optimization loop
 """
 
-from prompt_optimizer.core.evaluator import Evaluator
+from prompt_optimizer.core.evaluator import Evaluator, EvaluationResult
 from prompt_optimizer.core.optimizer import PromptOptimizer
 
-__all__ = ["Evaluator", "PromptOptimizer"]
+__all__ = ["Evaluator", "EvaluationResult", "PromptOptimizer"]

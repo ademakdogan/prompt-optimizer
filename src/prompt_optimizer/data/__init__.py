@@ -6,6 +6,6 @@ This module provides data handling utilities for:
 - Parsing ground truth values
 """
 
-from prompt_optimizer.data.loader import DataLoader
+from prompt_optimizer.data.loader import DataLoader, load_test_data
 
-__all__ = ["DataLoader"]
+__all__ = ["DataLoader", "load_test_data"]
