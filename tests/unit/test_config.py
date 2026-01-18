@@ -43,12 +43,16 @@ class TestSettings:
             assert settings.loop_count == 10
             assert settings.log_level == "DEBUG"
 
-    def test_api_key_default_empty(self) -> None:
-        """Test that API key defaults to empty string."""
-        with patch.dict(os.environ, {}, clear=True):
+    def test_api_key_from_settings(self) -> None:
+        """Test that API key can be loaded from environment."""
+        env_vars = {
+            "OPENROUTER_API_KEY": "test-key",
+        }
+        
+        with patch.dict(os.environ, env_vars, clear=True):
             settings = Settings()
             
-            assert settings.openrouter_api_key == ""
+            assert settings.openrouter_api_key == "test-key"
 
 
 class TestGetSettings:
