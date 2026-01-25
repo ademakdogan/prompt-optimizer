@@ -1,0 +1,538 @@
+
+================================================================================
+MENTOR PROMPT - INITIAL
+Timestamp: 2026-01-13 22:20:21
+================================================================================
+
+[SYSTEM]
+You are an expert prompt engineer specializing in PII extraction tasks.
+
+Your goal is to create a clear, detailed prompt that will guide an AI assistant 
+to accurately extract Personally Identifiable Information (PII) from text.
+
+The prompt should:
+1. Be specific about what types of PII to look for
+2. Provide clear instructions on the output format
+3. Include guidance on edge cases
+4. Be concise but comprehensive
+
+You must also provide improved descriptions for each field type to help
+the AI better understand what to extract. These descriptions will be used
+in the JSON schema to guide structured output parsing.
+
+[USER]
+Create a professional prompt for PII extraction based on this example:
+
+SAMPLE INPUT:
+Test data
+
+EXPECTED OUTPUT (target_result as JSON):
+Test ground truth
+
+
+
+
+Generate a prompt that would produce this expected output when given the sample input.
+Also provide improved descriptions for each field type that appears in the expected output.
+These descriptions should help the AI understand exactly what to look for.
+
+Explain your reasoning for the prompt design.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - IMPROVED
+Timestamp: 2026-01-13 22:20:21
+================================================================================
+
+[SYSTEM]
+You are an expert prompt engineer analyzing PII extraction errors.
+
+Your task is to improve the current prompt based on:
+1. Specific errors made by the agent
+2. Historical performance of previous prompts
+3. Patterns in what the agent is missing or misidentifying
+
+Generate an improved prompt that addresses these issues while maintaining 
+good performance on previously correct extractions.
+
+IMPORTANT: You must also update the field descriptions based on the errors.
+If a field is frequently missed or misidentified, improve its description
+to make it clearer what the field looks for. These descriptions will be
+used in the JSON schema for structured output parsing.
+
+[USER]
+Analyze these extraction errors and improve the prompt:
+
+CURRENT PROMPT:
+Original prompt
+
+ERRORS FROM CURRENT ITERATION:
+No errors in current iteration.
+
+HISTORICAL PERFORMANCE:
+No previous iterations.
+
+
+
+
+Generate an improved prompt that addresses the identified issues.
+Also update the field descriptions for any fields that have errors.
+Be specific about what changes you're making and why.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - INITIAL
+Timestamp: 2026-01-13 22:20:22
+================================================================================
+
+[SYSTEM]
+You are an expert prompt engineer specializing in PII extraction tasks.
+
+Your goal is to create a clear, detailed prompt that will guide an AI assistant 
+to accurately extract Personally Identifiable Information (PII) from text.
+
+The prompt should:
+1. Be specific about what types of PII to look for
+2. Provide clear instructions on the output format
+3. Include guidance on edge cases
+4. Be concise but comprehensive
+
+You must also provide improved descriptions for each field type to help
+the AI better understand what to extract. These descriptions will be used
+in the JSON schema to guide structured output parsing.
+
+[USER]
+Create a professional prompt for PII extraction based on this example:
+
+SAMPLE INPUT:
+Test data
+
+EXPECTED OUTPUT (target_result as JSON):
+Test ground truth
+
+
+
+
+Generate a prompt that would produce this expected output when given the sample input.
+Also provide improved descriptions for each field type that appears in the expected output.
+These descriptions should help the AI understand exactly what to look for.
+
+Explain your reasoning for the prompt design.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - IMPROVED
+Timestamp: 2026-01-13 22:20:22
+================================================================================
+
+[SYSTEM]
+You are an expert prompt engineer analyzing PII extraction errors.
+
+Your task is to improve the current prompt based on:
+1. Specific errors made by the agent
+2. Historical performance of previous prompts
+3. Patterns in what the agent is missing or misidentifying
+
+Generate an improved prompt that addresses these issues while maintaining 
+good performance on previously correct extractions.
+
+IMPORTANT: You must also update the field descriptions based on the errors.
+If a field is frequently missed or misidentified, improve its description
+to make it clearer what the field looks for. These descriptions will be
+used in the JSON schema for structured output parsing.
+
+[USER]
+Analyze these extraction errors and improve the prompt:
+
+CURRENT PROMPT:
+Original prompt
+
+ERRORS FROM CURRENT ITERATION:
+No errors in current iteration.
+
+HISTORICAL PERFORMANCE:
+No previous iterations.
+
+
+
+
+Generate an improved prompt that addresses the identified issues.
+Also update the field descriptions for any fields that have errors.
+Be specific about what changes you're making and why.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - INITIAL
+Timestamp: 2026-01-13 22:21:15
+================================================================================
+
+[SYSTEM]
+You are an expert prompt engineer specializing in PII extraction tasks.
+
+Your goal is to create a clear, detailed prompt that will guide an AI assistant 
+to accurately extract Personally Identifiable Information (PII) from text.
+
+The prompt should:
+1. Be specific about what types of PII to look for
+2. Provide clear instructions on the output format
+3. Include guidance on edge cases
+4. Be concise but comprehensive
+
+You must also provide improved descriptions for each field type to help
+the AI better understand what to extract. These descriptions will be used
+in the JSON schema to guide structured output parsing.
+
+[USER]
+Create a professional prompt for PII extraction based on this example:
+
+SAMPLE INPUT:
+The wellness portal is accessible at [-71.6702,-107.6572]. With numerous wellness tracks suitable for everyone in the family, enrol now! Contact us at Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:12.5) Gecko/20100101 Firefox/12.5.9 for further details.
+
+EXPECTED OUTPUT (target_result as JSON):
+{
+  "nearbygpscoordinate": "[-71.6702,-107.6572]",
+  "useragent": "Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:12.5) Gecko/20100101 Firefox/12.5.9",
+}
+
+
+
+
+Generate a prompt that would produce this expected output when given the sample input.
+Also provide improved descriptions for each field type that appears in the expected output.
+These descriptions should help the AI understand exactly what to look for.
+
+Explain your reasoning for the prompt design.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - IMPROVED
+Timestamp: 2026-01-13 22:22:02
+================================================================================
+
+[SYSTEM]
+You are an expert prompt engineer analyzing PII extraction errors.
+
+Your task is to improve the current prompt based on:
+1. Specific errors made by the agent
+2. Historical performance of previous prompts
+3. Patterns in what the agent is missing or misidentifying
+
+Generate an improved prompt that addresses these issues while maintaining 
+good performance on previously correct extractions.
+
+IMPORTANT: You must also update the field descriptions based on the errors.
+If a field is frequently missed or misidentified, improve its description
+to make it clearer what the field looks for. These descriptions will be
+used in the JSON schema for structured output parsing.
+
+[USER]
+Analyze these extraction errors and improve the prompt:
+
+CURRENT PROMPT:
+You are an AI assistant that extracts Personally Identifiable Information (PII) from the given text. Your task is to identify and return a minimal, exact-match JSON containing only the requested PII fields present in the input. Do not include any extraneous information or analysis.
+
+Target fields to extract (based on the example):
+- nearbygpscoordinate: A geographic coordinate pair in decimal degrees, enclosed in square brackets and formatted like [lat,lon]. The value must be exactly as it appears in the text, including the brackets.
+- useragent: The complete User-Agent string as it appears in the input (for example, Mozilla/5.0 ...). Do not modify or tokenize the string; preserve spaces and punctuation.
+
+Output format:
+- Return a JSON object with keys named exactly as the target fields above.
+- The value for each key must be the exact substring from the input that matches the field. If a field is not present, omit that key from the JSON (do not include null or empty values).
+- Do not include any additional text outside the JSON object.
+
+Edge cases and guidance:
+- If multiple occurrences exist for a field, return only the first match, unless the task explicitly asks for all occurrences.
+- If the input contains multiple potential matches that could be interpreted as the field, prefer the most clearly-labeled, unambiguous match. For coordinates, match the pattern of [lat,lon] with decimal numbers (including negative signs).
+- For the useragent, it typically starts with a token like Mozilla/ or AppleWebKit/ and continues until the end of the string or until a newline/end boundary; capture the full string fragment that represents the user agent.
+- Do not attempt to parse or validate the content of the fields beyond exact substring matching; preserve the substring exactly as it appears.
+
+Example alignment with sample input (for reference only):
+Input sample contains: nearbygpscoordinate = "[-71.6702,-107.6572]" and useragent = "Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:12.5) Gecko/20100101 Firefox/12.5.9". Your output should mirror these values exactly when present.
+
+Field descriptions (for schema):
+- nearbygpscoordinate: A string containing a single [lat,lon] pair in decimal degrees, including the square bracket delimiters.
+- useragent: The raw User-Agent string from the HTTP header, including all tokens, punctuation, and whitespace exactly as it appears in the input.
+
+ERRORS FROM CURRENT ITERATION:
+
+Error 1 (Field: useragent):
+- Source text: The wellness portal is accessible at [-71.6702,-107.6572]. With numerous wellness tracks suitable for everyone in the family, enrol now! Contact us at Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:1...
+- Agent's answer: Not extracted
+- Expected (ground truth): Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:12.5) Gecko/20100101 Firefox/12.5.9
+
+
+Error 2 (Field: nearbygpscoordinate):
+- Source text: The wellness portal is accessible at [-71.6702,-107.6572]. With numerous wellness tracks suitable for everyone in the family, enrol now! Contact us at Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:1...
+- Agent's answer: Not extracted
+- Expected (ground truth): [-71.6702,-107.6572]
+
+
+Error 3 (Field: firstname):
+- Source text: Carleton, the new interactive educational tools are set to arrive at [-38.9302,113.5422]. Your password for accessing online content: yZqd7gHyZq91....
+- Agent's answer: Not extracted
+- Expected (ground truth): Carleton
+
+
+Error 4 (Field: county):
+- Source text: 1. Customer query received at 10:18 PM from Human Group Coordinator of Cleveland based firm. The customer's email is Emilie_Beatty53@hotmail.com. Use our account number 63652332 for all financial exch...
+- Agent's answer: Not extracted
+- Expected (ground truth): Cleveland
+
+
+Error 5 (Field: jobtitle):
+- Source text: 1. Customer query received at 10:18 PM from Human Group Coordinator of Cleveland based firm. The customer's email is Emilie_Beatty53@hotmail.com. Use our account number 63652332 for all financial exch...
+- Agent's answer: Not extracted
+- Expected (ground truth): Human Group Coordinator
+
+
+Error 6 (Field: eyecolor):
+- Source text: 1. Customer query received at 10:18 PM from Human Group Coordinator of Cleveland based firm. The customer's email is Emilie_Beatty53@hotmail.com. Use our account number 63652332 for all financial exch...
+- Agent's answer: Brown
+- Expected (ground truth): Eye color: Brown
+
+
+Error 7 (Field: username):
+- Source text: Dear Mr. Vandervort, congratulations on turning 68! Your unique ID at our wellness center is 0Zr2bcG1X9Ub. Visit us at 609 Gorczany Pass for more personalized programs....
+- Agent's answer: Not extracted
+- Expected (ground truth): 0Zr2bcG1X9Ub
+
+
+Error 8 (Field: amount):
+- Source text: Please reach out to Janessa at janessa.smith@company.org or call 555-0123 for the latest updates on your order #ORD-7842. Payment of $1,250.00 USD was processed using card ending in 4532....
+- Agent's answer: 1,250.00
+- Expected (ground truth): $1,250.00
+
+
+HISTORICAL PERFORMANCE:
+
+Iteration 1:
+- Accuracy: 57.43%
+- Prompt: You are an AI assistant that extracts Personally Identifiable Information (PII) from the given text....
+- Error types: MISSING_useragent: 1, MISSING_nearbygpscoordinate: 1, MISSING_firstname: 1, MISSING_county: 1, MISSING_jobtitle: 1, EXTRA_city: 1, WRONG_eyecolor: 1, MISSING_username: 1, EXTRA_accountnumber: 1, WRONG_amount: 1
+
+
+
+
+
+CURRENT FIELD DESCRIPTIONS (update these based on errors):
+- nearbygpscoordinate: A string in the format [lat,lon], representing a latitude and longitude in decimal degrees. The value must include the opening and closing square brackets exactly as it appears in the input.
+- useragent: The complete User-Agent string from the HTTP header. Preserve the exact sequence of tokens, punctuation, and whitespace as provided, typically starting with a token like Mozilla/ or similar.
+
+
+Generate an improved prompt that addresses the identified issues.
+Also update the field descriptions for any fields that have errors.
+Be specific about what changes you're making and why.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - IMPROVED
+Timestamp: 2026-01-13 22:22:58
+================================================================================
+
+[SYSTEM]
+You are an expert prompt engineer analyzing PII extraction errors.
+
+Your task is to improve the current prompt based on:
+1. Specific errors made by the agent
+2. Historical performance of previous prompts
+3. Patterns in what the agent is missing or misidentifying
+
+Generate an improved prompt that addresses these issues while maintaining 
+good performance on previously correct extractions.
+
+IMPORTANT: You must also update the field descriptions based on the errors.
+If a field is frequently missed or misidentified, improve its description
+to make it clearer what the field looks for. These descriptions will be
+used in the JSON schema for structured output parsing.
+
+[USER]
+Analyze these extraction errors and improve the prompt:
+
+CURRENT PROMPT:
+Improved PII extraction prompt with explicit field definitions and strict substring matching. The agent should extract the following fields exactly as they appear in the input, returning a minimal JSON containing only the fields found (omit missing). For fields with numeric or structured formatting, ensure exact substring capture including delimiters. If multiple occurrences exist, return only the first valid match. If multiple potential matches exist, prefer the most clearly labeled/unambiguous substring. Do not generate or infer values beyond exact substrings from the input. Do not add any extra text outside the JSON object.
+
+Target fields to extract (exact substring from input):
+- nearbygpscoordinate: The first substring that matches a single [lat,lon] pair in decimal degrees, including the square brackets. Example: [-71.6702,-107.6572]. Preserve brackets and sign and decimal formatting exactly as in the text.
+- useragent: The complete User-Agent string as it appears in the input. Capture from the first token like Mozilla/ or AppleWebKit/ and continue exactly to the end of the user agent substring, up to a boundary such as newline or the end of the input. Preserve spaces and punctuation exactly as in the input.
+- firstname: The first name value embedded in the text (capitalized proper noun). Capture only the name as it appears (e.g., Carleton).
+- county: The county name representing the geographic area in the text. Capture exactly as it appears (e.g., Cleveland).
+- jobtitle: The job title string representing the role or position in the text. Capture exactly as it appears (e.g., Human Group Coordinator).
+- eyecolor: The color value following the label Eye color:. Capture only the color word(s) (e.g., Brown) exactly as it appears.
+- username: The unique user identifier present in the text. Capture exactly as it appears (e.g., 0Zr2bcG1X9Ub).
+- amount: The monetary amount including the $ sign and decimals, exactly as it appears (e.g., $1,250.00).
+
+Output format:
+- Return a JSON object with keys named exactly as the target fields above.
+- The value for each key must be the exact substring from the input that matches the field.
+- If a field is not present, omit that key from the JSON (do not include null or empty values).
+- Do not include any additional text outside the JSON object.
+
+Edge cases and guidance:
+- If multiple occurrences exist for a field, return only the first match, unless the task explicitly asks for all occurrences.
+- For coordinates, match the pattern of [lat,lon] with decimal numbers, including negative signs, exactly as in the input.
+- For useragent, capture the substring starting from the token Mozilla/ or AppleWebKit/ and ending at the natural boundary of the user agent in the text (end of that token sequence).
+- Do not attempt to parse or validate the content beyond exact substring matching.
+
+Historical context:
+- Use this improved specification to address previously observed misses where useragent, nearbygpscoordinate, firstname, county, jobtitle, eyecolor, username, and amount were not extracted or were misidentified. Ensure correctness across these fields while not degrading existing correct extractions.
+
+
+ERRORS FROM CURRENT ITERATION:
+
+Error 1 (Field: eyecolor):
+- Source text: 1. Customer query received at 10:18 PM from Human Group Coordinator of Cleveland based firm. The customer's email is Emilie_Beatty53@hotmail.com. Use our account number 63652332 for all financial exch...
+- Agent's answer: Brown
+- Expected (ground truth): Eye color: Brown
+
+
+HISTORICAL PERFORMANCE:
+
+Iteration 1:
+- Accuracy: 57.43%
+- Prompt: You are an AI assistant that extracts Personally Identifiable Information (PII) from the given text....
+- Error types: MISSING_useragent: 1, MISSING_nearbygpscoordinate: 1, MISSING_firstname: 1, MISSING_county: 1, MISSING_jobtitle: 1, EXTRA_city: 1, WRONG_eyecolor: 1, MISSING_username: 1, EXTRA_accountnumber: 1, WRONG_amount: 1
+
+
+Iteration 2:
+- Accuracy: 97.14%
+- Prompt: Improved PII extraction prompt with explicit field definitions and strict substring matching. The ag...
+- Error types: EXTRA_firstname: 1, EXTRA_lastname: 1, WRONG_eyecolor: 1
+
+
+
+
+
+CURRENT FIELD DESCRIPTIONS (update these based on errors):
+- nearbygpscoordinate: A string containing a single [lat,lon] pair in decimal degrees, including the square bracket delimiters. The value must be captured exactly as it appears in the input, e.g., '[-71.6702,-107.6572]'.
+- useragent: The complete User-Agent string as it appears in the input. Capture from the first token like Mozilla/ or AppleWebKit/ and end at the natural boundary, preserving spaces and punctuation exactly as in the input.
+- firstname: A capitalized personal name embedded in the text. Capture exactly the substring as it appears (e.g., 'Carleton').
+- county: The county name representing the geographic area in the text. Capture exactly as it appears (e.g., 'Cleveland').
+- jobtitle: The job title string representing the role or position in the text. Capture exactly as it appears (e.g., 'Human Group Coordinator').
+- eyecolor: The color value following the label 'Eye color:'; capture only the color word(s) exactly as it appears (e.g., 'Brown').
+- username: The unique user identifier present in the text. Capture exactly as it appears (e.g., '0Zr2bcG1X9Ub').
+- amount: The monetary amount including the dollar sign and decimals, exactly as it appears (e.g., '$1,250.00').
+
+
+Generate an improved prompt that addresses the identified issues.
+Also update the field descriptions for any fields that have errors.
+Be specific about what changes you're making and why.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - INITIAL
+Timestamp: 2026-01-13 23:38:18
+================================================================================
+
+[SYSTEM]
+You are an expert prompt engineer.
+
+Your goal is to create a clear, detailed prompt that will guide an AI assistant 
+to accurately extract structured information from text.
+
+The prompt should:
+1. Be specific about what types of data to look for
+2. Provide clear instructions on the output format (JSON)
+3. Include guidance on edge cases
+4. Be concise but comprehensive
+
+You must also provide descriptions for each field type to help
+the AI better understand what to extract.
+
+[USER]
+Create a professional prompt for data extraction based on this example:
+
+SAMPLE INPUT TEXT:
+Test data
+
+EXPECTED OUTPUT (ground truth):
+"Test ground truth"
+
+
+Generate a prompt that would produce this expected output when given the sample input.
+Also provide descriptions for each field type that appears in the expected output.
+These descriptions should help the AI understand exactly what to look for.
+
+Explain your reasoning for the prompt design.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - INITIAL
+Timestamp: 2026-01-13 23:39:04
+================================================================================
+
+[SYSTEM]
+You are an expert prompt engineer.
+
+Your goal is to create a clear, detailed prompt that will guide an AI assistant 
+to accurately extract structured information from text.
+
+The prompt should:
+1. Be specific about what types of data to look for
+2. Provide clear instructions on the output format (JSON)
+3. Include guidance on edge cases
+4. Be concise but comprehensive
+
+You must also provide descriptions for each field type to help
+the AI better understand what to extract.
+
+[USER]
+Create a professional prompt for data extraction based on this example:
+
+SAMPLE INPUT TEXT:
+Test data
+
+EXPECTED OUTPUT (ground truth):
+{
+  "firstname": "John"
+}
+
+
+Generate a prompt that would produce this expected output when given the sample input.
+Also provide descriptions for each field type that appears in the expected output.
+These descriptions should help the AI understand exactly what to look for.
+
+Explain your reasoning for the prompt design.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - IMPROVED
+Timestamp: 2026-01-13 23:39:04
+================================================================================
+
+[SYSTEM]
+You are an expert prompt engineer analyzing extraction errors.
+
+Your task is to improve the current prompt based on:
+1. The agent's incorrect predictions shown in the history
+2. Patterns in what the agent is missing or misidentifying
+3. Accuracy trends across iterations
+
+Generate an improved prompt that addresses these issues.
+
+IMPORTANT: You must also update the field descriptions based on the errors.
+If a field is frequently missed or has wrong values, improve its description
+to make it clearer what the field looks for.
+
+[USER]
+Analyze the agent's predictions and improve the prompt:
+
+CURRENT PROMPT:
+Original prompt
+
+ITERATION HISTORY (showing agent predictions vs ground truth):
+No previous iterations.
+
+
+The agent's predictions are shown above. Improve the prompt to help the agent
+produce better extractions. Be specific about what changes you're making and why.
+
+================================================================================

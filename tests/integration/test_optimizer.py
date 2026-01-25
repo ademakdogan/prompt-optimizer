@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from prompt_optimizer.core.evaluator import Evaluator
-from prompt_optimizer.models import TargetResult, GeneratedPrompt
+from prompt_optimizer.models import GeneratedPrompt
 
 
 class TestEvaluatorIntegration:
@@ -19,15 +19,15 @@ class TestEvaluatorIntegration:
         
         # Sample data pairs
         responses = [
-            TargetResult(firstname="John", email="john@email.com"),
-            TargetResult(firstname="Jane"),
-            TargetResult(email="test@mail.com"),
+            {"firstname": "John", "email": "john@email.com"},
+            {"firstname": "Jane"},
+            {"email": "test@mail.com"},
         ]
         
         ground_truths = [
-            TargetResult(firstname="John", email="john@email.com"),
-            TargetResult(firstname="Jane", email="jane@email.com"),
-            TargetResult(email="test@mail.com", phonenumber="555-1234"),
+            {"firstname": "John", "email": "john@email.com"},
+            {"firstname": "Jane", "email": "jane@email.com"},
+            {"email": "test@mail.com", "phonenumber": "555-1234"},
         ]
         
         source_texts = [
@@ -50,14 +50,6 @@ class TestEvaluatorIntegration:
         summary = evaluator.get_error_summary(results)
         assert "MISSING_email" in summary
         assert "MISSING_phonenumber" in summary
-        
-        # Collect errors for mentor
-        errors = evaluator.collect_errors(
-            responses, ground_truths, source_texts, "Extract PII"
-        )
-        
-        assert len(errors) >= 1
-        assert any(e.field_name == "email" for e in errors)
 
 
 class TestOptimizerIntegration:
@@ -75,13 +67,13 @@ class TestOptimizerIntegration:
         
         # Setup mocks
         mock_agent = MagicMock()
-        mock_agent.process_data.return_value = TargetResult()  # Empty response
+        mock_agent.process_data.return_value = {}  # Empty response
         mock_agent.update_field_descriptions = MagicMock()
         mock_agent_cls.return_value = mock_agent
         
         mock_mentor = MagicMock()
         mock_mentor.generate_initial_prompt.return_value = GeneratedPrompt(
-            prompt="Extract PII",
+            prompt="Extract data",
             reasoning="Initial prompt",
             field_descriptions={},
         )
@@ -96,7 +88,7 @@ class TestOptimizerIntegration:
         optimizer = PromptOptimizer(loop_count=2)
         
         data = [
-            ("Test text", TargetResult(firstname="John")),
+            ("Test text", {"firstname": "John"}),
         ]
         
         results = optimizer.optimize(data)
@@ -116,13 +108,13 @@ class TestOptimizerIntegration:
         
         # Setup mocks
         mock_agent = MagicMock()
-        mock_agent.process_data.return_value = TargetResult()
+        mock_agent.process_data.return_value = {}
         mock_agent.update_field_descriptions = MagicMock()
         mock_agent_cls.return_value = mock_agent
         
         mock_mentor = MagicMock()
         mock_mentor.generate_initial_prompt.return_value = GeneratedPrompt(
-            prompt="Extract PII",
+            prompt="Extract data",
             reasoning="Initial",
             field_descriptions={},
         )
@@ -137,7 +129,7 @@ class TestOptimizerIntegration:
         optimizer = PromptOptimizer(window_size=2, loop_count=4)
         
         data = [
-            ("Test text", TargetResult(email="test@email.com")),
+            ("Test text", {"email": "test@email.com"}),
         ]
         
         optimizer.optimize(data)
@@ -161,13 +153,13 @@ class TestOptimizerIntegration:
         
         # Setup mocks - agent returns perfect match
         mock_agent = MagicMock()
-        mock_agent.process_data.return_value = TargetResult(firstname="John")
+        mock_agent.process_data.return_value = {"firstname": "John"}
         mock_agent.update_field_descriptions = MagicMock()
         mock_agent_cls.return_value = mock_agent
         
         mock_mentor = MagicMock()
         mock_mentor.generate_initial_prompt.return_value = GeneratedPrompt(
-            prompt="Extract PII",
+            prompt="Extract data",
             reasoning="Initial",
             field_descriptions={},
         )
@@ -176,7 +168,7 @@ class TestOptimizerIntegration:
         optimizer = PromptOptimizer(loop_count=5)
         
         data = [
-            ("John is here", TargetResult(firstname="John")),
+            ("John is here", {"firstname": "John"}),
         ]
         
         results = optimizer.optimize(data)

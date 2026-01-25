@@ -2,12 +2,13 @@
 Agent model handler for processing data with prompts.
 
 The agent model processes input data using a given prompt and
-returns structured PII extraction results using TargetResult model.
+returns structured extraction results.
 """
+
+from typing import Any
 
 from prompt_optimizer.api.client import OpenRouterClient
 from prompt_optimizer.config import get_settings
-from prompt_optimizer.models import TargetResult
 from prompt_optimizer.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -18,7 +19,7 @@ class AgentModel:
     Agent model for processing data with prompts.
 
     The agent takes a prompt and input data, then returns
-    structured PII extraction results as TargetResult.
+    structured extraction results based on the schema.
 
     Attributes:
         client: The OpenRouter client instance.
@@ -27,10 +28,10 @@ class AgentModel:
     Examples:
         >>> agent = AgentModel()
         >>> response = agent.process_data(
-        ...     prompt="Extract PII entities from the text.",
+        ...     prompt="Extract key information from the text.",
         ...     data="Contact John at john@email.com"
         ... )
-        >>> isinstance(response, TargetResult)
+        >>> isinstance(response, dict)
         True
     """
 
@@ -59,8 +60,6 @@ class AgentModel:
         Examples:
             >>> agent = AgentModel()
             >>> agent.update_field_descriptions({"email": "Email in user@domain format"})
-            >>> agent.field_descriptions["email"]
-            'Email in user@domain format'
         """
         self.field_descriptions.update(descriptions)
         logger.info(f"Updated field descriptions: {list(descriptions.keys())}")
@@ -69,57 +68,61 @@ class AgentModel:
         self,
         prompt: str,
         data: str,
-        schema_description: str = "",
-    ) -> TargetResult:
+        response_schema: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """
         Process input data using the given prompt.
 
         Args:
-            prompt: The instruction prompt for PII extraction.
+            prompt: The instruction prompt for data extraction.
             data: The input text to analyze.
-            schema_description: Optional schema description for the model.
+            response_schema: Optional schema describing expected output fields.
 
         Returns:
-            TargetResult: Structured response with extracted PII fields.
+            dict: Extracted data as key-value pairs.
 
         Examples:
             >>> agent = AgentModel()
             >>> result = agent.process_data(
-            ...     prompt="Find all email addresses",
+            ...     prompt="Extract contact information",
             ...     data="Email: test@example.com"
             ... )
-            >>> hasattr(result, 'email')
+            >>> isinstance(result, dict)
             True
         """
         logger.debug(f"Processing data with prompt: {prompt[:50]}...")
         
-        system_message = self._build_system_message(prompt, schema_description)
+        system_message = self._build_system_message(prompt, response_schema)
         
         messages = [
             {"role": "system", "content": system_message},
-            {"role": "user", "content": f"Analyze this text and extract all PII:\n\n{data}"},
+            {"role": "user", "content": f"Extract information from this text:\n\n{data}"},
         ]
         
-        response = self.client.chat(
+        # Use raw chat and parse JSON response
+        response_text = self.client.chat_raw(
             messages=messages,
-            response_model=TargetResult,
-            temperature=0.3,  # Lower temperature for more consistent extraction
+            temperature=0.3,
+            reasoning_effort="low",
         )
         
-        # Count non-None fields
-        extracted_count = sum(
-            1 for k, v in response.model_dump().items() if v is not None
-        )
-        logger.debug(f"Extracted {extracted_count} PII fields")
-        return response
+        # Parse JSON from response
+        result = self._parse_json_response(response_text)
+        
+        logger.debug(f"Extracted {len(result)} fields")
+        return result
 
-    def _build_system_message(self, prompt: str, schema_description: str) -> str:
+    def _build_system_message(
+        self,
+        prompt: str,
+        response_schema: dict[str, Any] | None = None,
+    ) -> str:
         """
         Build the system message for the API request.
 
         Args:
             prompt: The user's extraction prompt.
-            schema_description: Optional schema description.
+            response_schema: Optional schema describing expected fields.
 
         Returns:
             str: The formatted system message.
@@ -134,43 +137,63 @@ FIELD DESCRIPTIONS (use these to understand what to extract):
 {chr(10).join(lines)}
 """
 
-        base_message = f"""You are a PII (Personally Identifiable Information) extraction assistant.
+        schema_section = ""
+        if response_schema:
+            schema_section = f"""
+
+EXPECTED OUTPUT SCHEMA:
+{response_schema}
+"""
+
+        base_message = f"""You are a data extraction assistant.
 
 {prompt}
 
-Your task is to extract PII from the given text and return a JSON object
-with the following field names (only include fields that are present in the text):
+Your task is to extract structured information from the given text and return it as a JSON object.
 
-- firstname: First name of a person
-- lastname: Last name/surname of a person
-- prefix: Title prefix like Mr., Mrs., Dr.
-- email: Email address
-- phonenumber: Phone number
-- age: Age of a person
-- street: Street address
-- city: City name
-- county: County or region name
-- country: Country name
-- zipcode: Postal/ZIP code
-- username: Username or user ID
-- password: Password
-- pin: PIN code
-- accountnumber: Bank or account number
-- maskednumber: Masked credit card number (last 4 digits)
-- time: Time value
-- date: Date value
-- amount: Monetary amount
-- currency: Currency code (USD, EUR, etc.)
-- jobtitle: Job title or position
-- eyecolor: Eye color description
-- nearbygpscoordinate: GPS coordinates
-- useragent: Browser user agent string
-- ipaddress: IP address
-- url: URL or web address
-{field_desc_section}
-Be thorough and accurate in your extraction. Only include fields that are found in the text."""
+Rules:
+1. Only extract information that is explicitly present in the text
+2. Use the field names as specified in the schema or prompt
+3. If a field is not found in the text, do not include it in the output
+4. Return ONLY valid JSON, no additional text or explanation
+{field_desc_section}{schema_section}
+Be thorough and accurate in your extraction."""
 
-        if schema_description:
-            base_message += f"\n\nAdditional schema notes:\n{schema_description}"
-        
         return base_message
+
+    def _parse_json_response(self, response_text: str) -> dict[str, Any]:
+        """
+        Parse JSON from the model response.
+
+        Args:
+            response_text: Raw text response from the model.
+
+        Returns:
+            dict: Parsed JSON data.
+        """
+        import json
+        import re
+        
+        # Try to extract JSON from the response
+        # First, try to find JSON block in markdown
+        json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', response_text, re.DOTALL)
+        if json_match:
+            try:
+                return json.loads(json_match.group(1))
+            except json.JSONDecodeError:
+                pass
+        
+        # Try to find raw JSON object
+        json_match = re.search(r'\{[^{}]*\}', response_text, re.DOTALL)
+        if json_match:
+            try:
+                return json.loads(json_match.group(0))
+            except json.JSONDecodeError:
+                pass
+        
+        # Try parsing the entire response
+        try:
+            return json.loads(response_text.strip())
+        except json.JSONDecodeError:
+            logger.warning(f"Failed to parse JSON from response: {response_text[:200]}")
+            return {}

@@ -4,19 +4,17 @@ Optimizer module for prompt optimization loop.
 This module provides the main optimization loop that:
 1. Processes data with current prompt
 2. Evaluates against ground truth
-3. Collects errors for mentor feedback
+3. Collects failed predictions for mentor feedback
 4. Generates improved prompts with updated field descriptions
 """
 
+from typing import Any
+
 from prompt_optimizer.api import AgentModel, MentorModel
+from prompt_optimizer.api.mentor import IterationHistory, FailedPrediction
 from prompt_optimizer.config import get_settings
 from prompt_optimizer.core.evaluator import Evaluator, EvaluationResult
-from prompt_optimizer.models import (
-    ErrorFeedback,
-    OptimizationResult,
-    TargetResult,
-    PromptHistory,
-)
+from prompt_optimizer.models import OptimizationResult
 from prompt_optimizer.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -27,7 +25,7 @@ class PromptOptimizer:
     Main optimizer class for prompt optimization loop.
 
     Coordinates the agent model, mentor model, and evaluator
-    to iteratively improve prompts for PII extraction.
+    to iteratively improve prompts for data extraction.
     The mentor also updates field descriptions to improve schema understanding.
 
     Attributes:
@@ -40,10 +38,9 @@ class PromptOptimizer:
 
     Examples:
         >>> optimizer = PromptOptimizer()
-        >>> # Run optimization with test data
         >>> results = optimizer.optimize(
-        ...     data=[("Sample text with john@email.com", target_result)],
-        ...     initial_prompt="Extract PII entities"
+        ...     data=[("Sample text", {"key": "value"})],
+        ...     initial_prompt="Extract key information"
         ... )
         >>> len(results) > 0
         True
@@ -76,7 +73,7 @@ class PromptOptimizer:
         self.mentor = MentorModel(model=mentor_model, api_key=api_key)
         self.evaluator = Evaluator()
         
-        self.history: list[PromptHistory] = []
+        self.history: list[IterationHistory] = []
         self.field_descriptions: dict[str, str] = {}
         
         logger.info(
@@ -86,24 +83,22 @@ class PromptOptimizer:
 
     def optimize(
         self,
-        data: list[tuple[str, TargetResult]],
+        data: list[tuple[str, dict[str, Any]]],
         initial_prompt: str | None = None,
-        schema_description: str = "",
     ) -> list[OptimizationResult]:
         """
         Run the optimization loop.
 
         Args:
-            data: List of (source_text, target_result) tuples.
+            data: List of (source_text, ground_truth) tuples.
             initial_prompt: Starting prompt. If None, mentor generates one.
-            schema_description: Description of expected output schema.
 
         Returns:
             list[OptimizationResult]: Results from each iteration.
 
         Examples:
             >>> optimizer = PromptOptimizer()
-            >>> data = [("Contact john@email.com", target_result)]
+            >>> data = [("Contact john@email.com", {"email": "john@email.com"})]
             >>> results = optimizer.optimize(data)
             >>> len(results) == optimizer.loop_count
             True
@@ -113,8 +108,8 @@ class PromptOptimizer:
         # Get initial prompt if not provided
         current_prompt = initial_prompt
         if current_prompt is None:
-            logger.info("No initial prompt provided, generating from sample data")
-            current_prompt = self._generate_initial_prompt(data, schema_description)
+            logger.info("No initial prompt provided, generating from mentor")
+            current_prompt = self._generate_initial_prompt(data)
         
         results: list[OptimizationResult] = []
         
@@ -130,7 +125,7 @@ class PromptOptimizer:
                 self.agent.update_field_descriptions(self.field_descriptions)
             
             # Process all data with current prompt
-            responses = self._process_all_data(data, current_prompt, schema_description)
+            responses = self._process_all_data(data, current_prompt)
             
             # Evaluate responses
             source_texts = [text for text, _ in data]
@@ -140,15 +135,21 @@ class PromptOptimizer:
                 responses, ground_truths
             )
             
-            logger.info(f"Iteration {iteration} accuracy: {accuracy:.2%}")
+            accuracy_percent = accuracy * 100
+            logger.info(f"Iteration {iteration} accuracy: {accuracy_percent:.1f}%")
             
-            # Collect errors
-            errors = self.evaluator.collect_errors(
-                responses, ground_truths, source_texts, current_prompt
+            # Build iteration history with failed predictions
+            failed_predictions = self._collect_failed_predictions(
+                eval_results, source_texts
             )
             
-            # Get error summary for history
-            error_summary = self.evaluator.get_error_summary(eval_results)
+            iteration_history = IterationHistory(
+                iteration=iteration,
+                prompt=current_prompt,
+                prompt_accuracy=accuracy_percent,
+                failed_predictions=failed_predictions,
+            )
+            self.history.append(iteration_history)
             
             # Store result
             result = OptimizationResult(
@@ -156,24 +157,14 @@ class PromptOptimizer:
                 prompt=current_prompt,
                 accuracy=accuracy,
                 total_samples=len(data),
-                correct_samples=sum(r.accuracy for r in eval_results),
-                errors=errors,
+                correct_samples=sum(1 for r in eval_results if r.is_correct),
+                errors=[],  # Deprecated, using failed_predictions now
                 field_descriptions=self.field_descriptions.copy(),
             )
             results.append(result)
             
-            # Update history
-            history_entry = PromptHistory(
-                iteration=iteration,
-                prompt=current_prompt,
-                accuracy=accuracy,
-                error_summary=error_summary,
-                field_descriptions=self.field_descriptions.copy(),
-            )
-            self.history.append(history_entry)
-            
             # Log result
-            self._log_iteration_result(result)
+            self._log_iteration_result(result, len(failed_predictions))
             
             # If perfect accuracy, stop early
             if accuracy >= 1.0:
@@ -181,10 +172,8 @@ class PromptOptimizer:
                 break
             
             # Generate improved prompt for next iteration (if not last)
-            if iteration < self.loop_count and errors:
-                current_prompt = self._generate_improved_prompt(
-                    current_prompt, errors, schema_description
-                )
+            if iteration < self.loop_count and failed_predictions:
+                current_prompt = self._generate_improved_prompt(current_prompt)
         
         # Final summary
         self._log_final_summary(results)
@@ -193,29 +182,23 @@ class PromptOptimizer:
 
     def _generate_initial_prompt(
         self,
-        data: list[tuple[str, TargetResult]],
-        schema_description: str,
+        data: list[tuple[str, dict[str, Any]]],
     ) -> str:
         """
         Generate initial prompt using mentor model.
 
         Args:
             data: Sample data for prompt generation.
-            schema_description: Description of expected schema.
 
         Returns:
             str: Generated initial prompt.
         """
         # Use first sample for initial prompt generation
-        sample_text, target_result = data[0]
-        
-        # Convert target result to JSON-like format
-        gt_str = self._format_target_result(target_result)
+        sample_text, ground_truth = data[0]
         
         generated = self.mentor.generate_initial_prompt(
             sample_data=sample_text,
-            ground_truth=gt_str,
-            schema_description=schema_description,
+            ground_truth=ground_truth,
             current_field_descriptions=self.field_descriptions,
         )
         
@@ -229,19 +212,12 @@ class PromptOptimizer:
         
         return generated.prompt
 
-    def _generate_improved_prompt(
-        self,
-        current_prompt: str,
-        errors: list[ErrorFeedback],
-        schema_description: str,
-    ) -> str:
+    def _generate_improved_prompt(self, current_prompt: str) -> str:
         """
-        Generate improved prompt based on errors.
+        Generate improved prompt based on history.
 
         Args:
             current_prompt: The current prompt being used.
-            errors: Errors from current iteration.
-            schema_description: Description of expected schema.
 
         Returns:
             str: Improved prompt.
@@ -250,10 +226,8 @@ class PromptOptimizer:
         history_window = self.history[-self.window_size:] if self.history else []
         
         generated = self.mentor.generate_prompt(
-            errors=errors,
             history=history_window,
             current_prompt=current_prompt,
-            schema_description=schema_description,
             current_field_descriptions=self.field_descriptions,
         )
         
@@ -269,20 +243,18 @@ class PromptOptimizer:
 
     def _process_all_data(
         self,
-        data: list[tuple[str, TargetResult]],
+        data: list[tuple[str, dict[str, Any]]],
         prompt: str,
-        schema_description: str,
-    ) -> list[TargetResult]:
+    ) -> list[dict[str, Any]]:
         """
         Process all data samples with the agent.
 
         Args:
-            data: List of (source_text, target_result) tuples.
+            data: List of (source_text, ground_truth) tuples.
             prompt: The prompt to use.
-            schema_description: Schema description.
 
         Returns:
-            list[TargetResult]: Agent responses for all samples.
+            list[dict]: Agent responses for all samples.
         """
         responses = []
         
@@ -293,49 +265,59 @@ class PromptOptimizer:
                 response = self.agent.process_data(
                     prompt=prompt,
                     data=source_text,
-                    schema_description=schema_description,
                 )
                 responses.append(response)
             except Exception as e:
                 logger.error(f"Error processing sample {i+1}: {e}")
                 # Return empty response on error
-                responses.append(TargetResult())
+                responses.append({})
         
         return responses
 
-    def _format_target_result(self, target_result: TargetResult) -> str:
+    def _collect_failed_predictions(
+        self,
+        eval_results: list[EvaluationResult],
+        source_texts: list[str],
+    ) -> list[FailedPrediction]:
         """
-        Format target result for display.
+        Collect failed predictions from evaluation results.
 
         Args:
-            target_result: The target result to format.
+            eval_results: List of evaluation results.
+            source_texts: List of source texts.
 
         Returns:
-            str: JSON-like formatted string.
+            list[FailedPrediction]: List of failed predictions.
         """
-        fields = {
-            k: v for k, v in target_result.model_dump().items() if v is not None
-        }
+        failed = []
         
-        lines = ["{"]
-        for field, value in fields.items():
-            lines.append(f'  "{field}": "{value}",')
-        lines.append("}")
+        for result, source_text in zip(eval_results, source_texts):
+            if not result.is_correct:
+                failed.append(FailedPrediction(
+                    source_text=source_text,
+                    ground_truth=result.ground_truth,
+                    predict=result.prediction,
+                ))
         
-        return "\n".join(lines)
+        return failed
 
-    def _log_iteration_result(self, result: OptimizationResult) -> None:
+    def _log_iteration_result(
+        self,
+        result: OptimizationResult,
+        failed_count: int,
+    ) -> None:
         """
         Log the result of an iteration.
 
         Args:
             result: The optimization result.
+            failed_count: Number of failed predictions.
         """
         logger.info(f"""
 --- Iteration {result.iteration} Summary ---
 Accuracy: {result.accuracy:.2%}
-Correct samples: {result.correct_samples:.1f}/{result.total_samples}
-Error types: {len(result.errors)}
+Correct samples: {result.correct_samples}/{result.total_samples}
+Failed predictions: {failed_count}
 Prompt length: {len(result.prompt)} chars
 Field descriptions: {len(result.field_descriptions)}
 """)

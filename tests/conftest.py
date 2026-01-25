@@ -4,26 +4,24 @@ Test configuration and fixtures for Prompt Optimizer.
 
 import json
 from pathlib import Path
-from typing import Generator
+from typing import Any, Generator
 
 import pytest
 
-from prompt_optimizer.models import TargetResult
-
 
 @pytest.fixture
-def sample_target_result() -> TargetResult:
+def sample_ground_truth() -> dict[str, Any]:
     """
-    Create a sample TargetResult for testing.
+    Create a sample ground truth for testing.
 
     Returns:
-        TargetResult: A test result with PII data.
+        dict: A test result with extracted data.
     """
-    return TargetResult(
-        firstname="John",
-        email="test@example.com",
-        phonenumber="555-1234",
-    )
+    return {
+        "firstname": "John",
+        "email": "test@example.com",
+        "phonenumber": "555-1234",
+    }
 
 
 @pytest.fixture
@@ -32,7 +30,7 @@ def sample_source_text() -> str:
     Create sample source text for testing.
 
     Returns:
-        str: Source text with PII.
+        str: Source text with data to extract.
     """
     return "John contact: test@example.com phone: 555-1234"
 

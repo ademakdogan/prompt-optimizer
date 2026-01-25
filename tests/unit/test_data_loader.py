@@ -4,11 +4,11 @@ Unit tests for data loader module.
 
 import json
 from pathlib import Path
+from typing import Any
 
 import pytest
 
 from prompt_optimizer.data import DataLoader, load_test_data
-from prompt_optimizer.models import TargetResult
 
 
 class TestDataLoader:
@@ -67,21 +67,20 @@ class TestDataLoader:
         }
         result = DataLoader.parse_target_result(sample)
         
-        assert isinstance(result, TargetResult)
-        assert result.firstname == "John"
-        assert result.email == "john@email.com"
+        assert isinstance(result, dict)
+        assert result["firstname"] == "John"
+        assert result["email"] == "john@email.com"
 
     def test_parse_target_result_empty(self) -> None:
         """Test parsing target_result with empty data."""
         sample = {
-            "source_text": "No PII here",
+            "source_text": "No data here",
             "target_result": {},
         }
         
         result = DataLoader.parse_target_result(sample)
         
-        assert result.firstname is None
-        assert result.email is None
+        assert result == {}
 
     def test_get_source_text(self) -> None:
         """Test extracting source text."""
@@ -119,7 +118,7 @@ class TestLoadTestData:
         assert all(len(item) == 2 for item in loaded_data)
 
     def test_load_test_data_returns_tuples(self, tmp_path: Path) -> None:
-        """Test that load_test_data returns (source_text, target_result) tuples."""
+        """Test that load_test_data returns (source_text, ground_truth) tuples."""
         json_file = tmp_path / "test.json"
         data = [
             {"source_text": "Hello John", "target_result": {"firstname": "John"}},
@@ -130,7 +129,7 @@ class TestLoadTestData:
         
         loaded_data = load_test_data(json_file, limit=1)
         
-        source_text, target_result = loaded_data[0]
+        source_text, ground_truth = loaded_data[0]
         
         assert isinstance(source_text, str)
-        assert isinstance(target_result, TargetResult)
+        assert isinstance(ground_truth, dict)

@@ -5,7 +5,6 @@ Unit tests for evaluator module.
 import pytest
 
 from prompt_optimizer.core.evaluator import Evaluator, EvaluationResult
-from prompt_optimizer.models import TargetResult, ErrorFeedback
 
 
 class TestEvaluator:
@@ -15,8 +14,8 @@ class TestEvaluator:
         """Test evaluation with perfect match."""
         evaluator = Evaluator()
         
-        response = TargetResult(firstname="John", email="test@email.com")
-        ground_truth = TargetResult(firstname="John", email="test@email.com")
+        response = {"firstname": "John", "email": "test@email.com"}
+        ground_truth = {"firstname": "John", "email": "test@email.com"}
         
         result = evaluator.evaluate_single(response, ground_truth)
         
@@ -29,8 +28,8 @@ class TestEvaluator:
         """Test evaluation with missing field."""
         evaluator = Evaluator()
         
-        response = TargetResult()  # Empty
-        ground_truth = TargetResult(firstname="John")
+        response = {}  # Empty
+        ground_truth = {"firstname": "John"}
         
         result = evaluator.evaluate_single(response, ground_truth)
         
@@ -43,8 +42,8 @@ class TestEvaluator:
         """Test evaluation with extra (false positive) field."""
         evaluator = Evaluator()
         
-        response = TargetResult(email="test@email.com")
-        ground_truth = TargetResult()  # Empty
+        response = {"email": "test@email.com"}
+        ground_truth = {}  # Empty
         
         result = evaluator.evaluate_single(response, ground_truth)
         
@@ -55,8 +54,8 @@ class TestEvaluator:
         """Test evaluation with partial match."""
         evaluator = Evaluator()
         
-        response = TargetResult(firstname="John")
-        ground_truth = TargetResult(firstname="John", email="test@email.com")
+        response = {"firstname": "John"}
+        ground_truth = {"firstname": "John", "email": "test@email.com"}
         
         result = evaluator.evaluate_single(response, ground_truth)
         
@@ -68,11 +67,11 @@ class TestEvaluator:
         """Test batch evaluation."""
         evaluator = Evaluator()
         
-        response1 = TargetResult(firstname="John")
-        ground_truth1 = TargetResult(firstname="John")
+        response1 = {"firstname": "John"}
+        ground_truth1 = {"firstname": "John"}
         
-        response2 = TargetResult()
-        ground_truth2 = TargetResult(email="test@email.com")
+        response2 = {}
+        ground_truth2 = {"email": "test@email.com"}
         
         accuracy, results = evaluator.evaluate_batch(
             [response1, response2],
@@ -90,48 +89,22 @@ class TestEvaluator:
         
         with pytest.raises(ValueError, match="Mismatched lengths"):
             evaluator.evaluate_batch(
-                [TargetResult()],
-                [TargetResult(), TargetResult()],
+                [{}],
+                [{}, {}],
             )
 
     def test_collect_errors(self) -> None:
         """Test error collection for mentor feedback."""
         evaluator = Evaluator()
         
-        response = TargetResult()
-        ground_truth = TargetResult(firstname="John")
+        response = {}
+        ground_truth = {"firstname": "John"}
         
-        errors = evaluator.collect_errors(
-            responses=[response],
-            ground_truths=[ground_truth],
-            source_texts=["Hello John"],
-            prompt="Extract PII",
-        )
+        # evaluate_single now returns prediction and ground_truth
+        result = evaluator.evaluate_single(response, ground_truth)
         
-        assert len(errors) == 1
-        assert errors[0].field_name == "firstname"
-
-    def test_collect_errors_unique_by_field(self) -> None:
-        """Test that errors are grouped by field type."""
-        evaluator = Evaluator()
-        
-        # Two samples with same missing field type
-        response1 = TargetResult()
-        response2 = TargetResult()
-        
-        ground_truth1 = TargetResult(email="test1@email.com")
-        ground_truth2 = TargetResult(email="test2@email.com")
-        
-        errors = evaluator.collect_errors(
-            responses=[response1, response2],
-            ground_truths=[ground_truth1, ground_truth2],
-            source_texts=["Email: test1@email.com", "Email: test2@email.com"],
-            prompt="Extract PII",
-        )
-        
-        # Should only have one unique error for email
-        assert len(errors) == 1
-        assert errors[0].field_name == "email"
+        assert result.prediction == {}
+        assert result.ground_truth == {"firstname": "John"}
 
     def test_get_error_summary(self) -> None:
         """Test error summary generation."""
@@ -143,6 +116,8 @@ class TestEvaluator:
             missing_fields=["firstname", "email"],
             extra_fields=[],
             wrong_values=[],
+            prediction={},
+            ground_truth={"firstname": "John", "email": "test@mail.com"},
         )
         
         summary = evaluator.get_error_summary([result])
@@ -162,7 +137,10 @@ class TestEvaluationResult:
             missing_fields=[],
             extra_fields=[],
             wrong_values=[],
+            prediction={"firstname": "John"},
+            ground_truth={"firstname": "John"},
         )
         
         assert result.is_correct is True
         assert result.accuracy == 1.0
+        assert result.prediction == {"firstname": "John"}

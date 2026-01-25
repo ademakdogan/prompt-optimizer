@@ -2,14 +2,13 @@
 Data loader module for Prompt Optimizer.
 
 This module provides utilities for loading and parsing data
-from various formats (JSONL, JSON) for PII extraction tasks.
+from various formats (JSONL, JSON) for data extraction tasks.
 """
 
 import json
 from pathlib import Path
-from typing import Iterator
+from typing import Any, Iterator
 
-from prompt_optimizer.models import TargetResult
 from prompt_optimizer.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -17,7 +16,7 @@ logger = get_logger(__name__)
 
 class DataLoader:
     """
-    Data loader for PII extraction datasets.
+    Data loader for extraction datasets.
 
     Supports loading from JSONL and JSON formats, with methods
     to parse ground truth into structured format.
@@ -114,15 +113,15 @@ class DataLoader:
             return [data]
 
     @staticmethod
-    def parse_target_result(sample: dict) -> TargetResult:
+    def parse_target_result(sample: dict) -> dict[str, Any]:
         """
-        Parse a sample's target_result into a TargetResult model.
+        Parse a sample's target_result into a dictionary.
 
         Args:
             sample: A sample dictionary containing target_result.
 
         Returns:
-            TargetResult: Structured ground truth response.
+            dict: Ground truth as dictionary.
 
         Examples:
             >>> sample = {
@@ -132,11 +131,10 @@ class DataLoader:
             ...     }
             ... }
             >>> result = DataLoader.parse_target_result(sample)
-            >>> result.firstname
+            >>> result["firstname"]
             'John'
         """
-        target_result_data = sample.get("target_result", {})
-        return TargetResult(**target_result_data)
+        return sample.get("target_result", {})
 
     @staticmethod
     def get_source_text(sample: dict) -> str:
@@ -160,7 +158,7 @@ class DataLoader:
 def load_test_data(
     file_path: str | Path,
     limit: int = 5,
-) -> list[tuple[str, TargetResult]]:
+) -> list[tuple[str, dict[str, Any]]]:
     """
     Convenience function to load test data with ground truth.
 
@@ -169,13 +167,13 @@ def load_test_data(
         limit: Number of samples to load.
 
     Returns:
-        list[tuple[str, TargetResult]]: List of (source_text, target_result) tuples.
+        list[tuple[str, dict]]: List of (source_text, ground_truth) tuples.
 
     Examples:
         >>> data = load_test_data("resources/test_data.json", limit=5)
         >>> len(data) == 5
         True
-        >>> isinstance(data[0][1], TargetResult)
+        >>> isinstance(data[0][1], dict)
         True
     """
     loader = DataLoader(file_path)

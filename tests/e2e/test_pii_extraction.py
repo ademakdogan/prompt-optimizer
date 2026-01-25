@@ -1,5 +1,5 @@
 """
-End-to-end tests for PII extraction flow.
+End-to-end tests for data extraction flow.
 """
 
 from pathlib import Path
@@ -8,15 +8,15 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from prompt_optimizer.data import load_test_data
-from prompt_optimizer.models import TargetResult, GeneratedPrompt
+from prompt_optimizer.models import GeneratedPrompt
 
 
 # Path to test data relative to project root
 TEST_DATA_PATH = Path(__file__).parent.parent.parent / "resources" / "test_data.json"
 
 
-class TestPIIExtractionE2E:
-    """End-to-end tests for PII extraction workflow."""
+class TestDataExtractionE2E:
+    """End-to-end tests for data extraction workflow."""
 
     @pytest.mark.skipif(
         not TEST_DATA_PATH.exists(),
@@ -28,31 +28,29 @@ class TestPIIExtractionE2E:
         
         assert len(data) == 5
         
-        for source_text, target_result in data:
+        for source_text, ground_truth in data:
             assert isinstance(source_text, str)
             assert len(source_text) > 0
-            assert isinstance(target_result, TargetResult)
+            assert isinstance(ground_truth, dict)
 
     @pytest.mark.skipif(
         not TEST_DATA_PATH.exists(),
         reason="Test data file not found",
     )
     def test_data_variety(self) -> None:
-        """Test that test data covers various PII types."""
+        """Test that test data covers various field types."""
         data = load_test_data(TEST_DATA_PATH, limit=5)
         
         all_fields = set()
-        for _, target_result in data:
-            result_dict = target_result.model_dump()
-            for field, value in result_dict.items():
-                if value is not None:
-                    all_fields.add(field)
+        for _, ground_truth in data:
+            for field in ground_truth.keys():
+                all_fields.add(field)
         
-        # Should have variety of PII types
+        # Should have variety of field types
         assert len(all_fields) >= 5
 
 
-class TestPIIExtractionMocked:
+class TestDataExtractionMocked:
     """E2E tests with mocked API for fast, reliable testing."""
 
     @patch("prompt_optimizer.core.optimizer.MentorModel")
@@ -71,16 +69,16 @@ class TestPIIExtractionMocked:
         
         # Simulate improving accuracy over iterations
         responses = [
-            TargetResult(),  # First iteration: empty
-            TargetResult(firstname="John"),  # Second: partial
-            TargetResult(firstname="John", email="test@example.com"),  # Third: perfect
+            {},  # First iteration: empty
+            {"firstname": "John"},  # Second: partial
+            {"firstname": "John", "email": "test@example.com"},  # Third: perfect
         ]
         mock_agent.process_data.side_effect = responses
         mock_agent_cls.return_value = mock_agent
         
         mock_mentor = MagicMock()
         mock_mentor.generate_initial_prompt.return_value = GeneratedPrompt(
-            prompt="Extract PII from text",
+            prompt="Extract key information from text",
             reasoning="Initial prompt for extraction",
             field_descriptions={"firstname": "A person's first name"},
         )
@@ -95,7 +93,7 @@ class TestPIIExtractionMocked:
         
         data = [
             ("John can be reached at test@example.com", 
-             TargetResult(firstname="John", email="test@example.com")),
+             {"firstname": "John", "email": "test@example.com"}),
         ]
         
         results = optimizer.optimize(data)

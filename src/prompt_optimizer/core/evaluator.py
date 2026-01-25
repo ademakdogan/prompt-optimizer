@@ -2,12 +2,11 @@
 Evaluator module for comparing agent responses with ground truth.
 
 This module provides utilities for evaluating the accuracy of
-PII extraction and collecting errors for mentor feedback.
+data extraction and collecting errors for mentor feedback.
 """
 
-from typing import NamedTuple
+from typing import Any, NamedTuple
 
-from prompt_optimizer.models import ErrorFeedback, TargetResult
 from prompt_optimizer.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -23,6 +22,8 @@ class EvaluationResult(NamedTuple):
         missing_fields: Fields in ground truth but not in response.
         extra_fields: Fields in response but not in ground truth.
         wrong_values: Fields with incorrect values.
+        prediction: The agent's prediction dict.
+        ground_truth: The expected ground truth dict.
     """
 
     is_correct: bool
@@ -30,6 +31,8 @@ class EvaluationResult(NamedTuple):
     missing_fields: list[str]
     extra_fields: list[str]
     wrong_values: list[tuple[str, str, str]]  # (field, response_value, truth_value)
+    prediction: dict[str, Any]
+    ground_truth: dict[str, Any]
 
 
 class Evaluator:
@@ -38,8 +41,8 @@ class Evaluator:
 
     Examples:
         >>> evaluator = Evaluator()
-        >>> response = TargetResult(firstname="John", email="john@email.com")
-        >>> ground_truth = TargetResult(firstname="John", email="john@email.com")
+        >>> response = {"firstname": "John", "email": "john@email.com"}
+        >>> ground_truth = {"firstname": "John", "email": "john@email.com"}
         >>> result = evaluator.evaluate_single(response, ground_truth)
         >>> result.is_correct
         True
@@ -56,15 +59,15 @@ class Evaluator:
 
     def evaluate_single(
         self,
-        response: TargetResult,
-        ground_truth: TargetResult,
+        response: dict[str, Any],
+        ground_truth: dict[str, Any],
     ) -> EvaluationResult:
         """
         Evaluate a single response against ground truth.
 
         Args:
-            response: The agent's response.
-            ground_truth: The expected correct result.
+            response: The agent's response as dict.
+            ground_truth: The expected correct result as dict.
 
         Returns:
             EvaluationResult: Detailed evaluation result.
@@ -72,22 +75,14 @@ class Evaluator:
         Examples:
             >>> evaluator = Evaluator()
             >>> result = evaluator.evaluate_single(
-            ...     TargetResult(firstname="John"),
-            ...     TargetResult(firstname="John", email="test@mail.com")
+            ...     {"firstname": "John"},
+            ...     {"firstname": "John", "email": "test@mail.com"}
             ... )
             >>> result.is_correct
             False
         """
-        # Get non-None fields from both
-        response_fields = {
-            k: v for k, v in response.model_dump().items() if v is not None
-        }
-        truth_fields = {
-            k: v for k, v in ground_truth.model_dump().items() if v is not None
-        }
-        
-        response_keys = set(response_fields.keys())
-        truth_keys = set(truth_fields.keys())
+        response_keys = set(response.keys())
+        truth_keys = set(ground_truth.keys())
         
         # Find missing and extra fields
         missing_fields = list(truth_keys - response_keys)
@@ -96,8 +91,8 @@ class Evaluator:
         # Check for wrong values in common fields
         wrong_values = []
         for field in response_keys & truth_keys:
-            resp_val = str(response_fields[field])
-            truth_val = str(truth_fields[field])
+            resp_val = str(response[field])
+            truth_val = str(ground_truth[field])
             
             if not self.case_sensitive:
                 resp_val_cmp = resp_val.lower()
@@ -129,12 +124,14 @@ class Evaluator:
             missing_fields=missing_fields,
             extra_fields=extra_fields,
             wrong_values=wrong_values,
+            prediction=response,
+            ground_truth=ground_truth,
         )
 
     def evaluate_batch(
         self,
-        responses: list[TargetResult],
-        ground_truths: list[TargetResult],
+        responses: list[dict[str, Any]],
+        ground_truths: list[dict[str, Any]],
     ) -> tuple[float, list[EvaluationResult]]:
         """
         Evaluate a batch of responses against ground truths.
@@ -151,8 +148,8 @@ class Evaluator:
 
         Examples:
             >>> evaluator = Evaluator()
-            >>> results = [TargetResult(firstname="John")]
-            >>> truths = [TargetResult(firstname="John")]
+            >>> results = [{"firstname": "John"}]
+            >>> truths = [{"firstname": "John"}]
             >>> accuracy, evals = evaluator.evaluate_batch(results, truths)
             >>> accuracy
             1.0
@@ -180,81 +177,6 @@ class Evaluator:
         
         return avg_accuracy, eval_results
 
-    def collect_errors(
-        self,
-        responses: list[TargetResult],
-        ground_truths: list[TargetResult],
-        source_texts: list[str],
-        prompt: str,
-    ) -> list[ErrorFeedback]:
-        """
-        Collect errors for mentor feedback.
-
-        Args:
-            responses: List of agent responses.
-            ground_truths: List of expected results.
-            source_texts: List of source texts.
-            prompt: The prompt used for extraction.
-
-        Returns:
-            list[ErrorFeedback]: List of unique error feedback items.
-
-        Examples:
-            >>> evaluator = Evaluator()
-            >>> errors = evaluator.collect_errors(
-            ...     [TargetResult()],
-            ...     [TargetResult(email="test@mail.com")],
-            ...     ["Contact at test@mail.com"],
-            ...     "Extract PII"
-            ... )
-            >>> len(errors) == 1
-            True
-        """
-        errors = []
-        seen_fields = set()
-        
-        for response, truth, source_text in zip(
-            responses, ground_truths, source_texts
-        ):
-            result = self.evaluate_single(response, truth)
-            truth_fields = {
-                k: v for k, v in truth.model_dump().items() if v is not None
-            }
-            response_fields = {
-                k: v for k, v in response.model_dump().items() if v is not None
-            }
-            
-            # Missing fields
-            for field in result.missing_fields:
-                if field not in seen_fields:
-                    seen_fields.add(field)
-                    errors.append(
-                        ErrorFeedback(
-                            field_name=field,
-                            prompt=prompt,
-                            source_text=source_text,
-                            agent_answer="Not extracted",
-                            ground_truth=str(truth_fields.get(field, "")),
-                        )
-                    )
-            
-            # Wrong values
-            for field, resp_val, truth_val in result.wrong_values:
-                if field not in seen_fields:
-                    seen_fields.add(field)
-                    errors.append(
-                        ErrorFeedback(
-                            field_name=field,
-                            prompt=prompt,
-                            source_text=source_text,
-                            agent_answer=resp_val,
-                            ground_truth=truth_val,
-                        )
-                    )
-        
-        logger.info(f"Collected {len(errors)} unique error types")
-        return errors
-
     def get_error_summary(
         self,
         eval_results: list[EvaluationResult],
@@ -275,7 +197,9 @@ class Evaluator:
             ...     accuracy=0.5,
             ...     missing_fields=["email"],
             ...     extra_fields=[],
-            ...     wrong_values=[]
+            ...     wrong_values=[],
+            ...     prediction={},
+            ...     ground_truth={"email": "test@mail.com"}
             ... )
             >>> summary = evaluator.get_error_summary([result])
             >>> summary["MISSING_email"]

@@ -74,16 +74,18 @@ class TestAgentModel:
         from prompt_optimizer.api.agent import AgentModel
         
         mock_client = MagicMock()
-        mock_client.chat.return_value = PIIResponse(entities=[], masked_text="")
+        # Agent now uses chat_raw and returns dict
+        mock_client.chat_raw.return_value = '{"firstname": "John", "email": "test@email.com"}'
         mock_client_cls.return_value = mock_client
         
         agent = AgentModel(model="test-model", api_key="test-key")
         result = agent.process_data(
-            prompt="Extract PII",
+            prompt="Extract data",
             data="Test data",
         )
         
-        assert isinstance(result, PIIResponse)
+        assert isinstance(result, dict)
+        assert result.get("firstname") == "John"
 
 
 class TestMentorModel:
@@ -105,7 +107,7 @@ class TestMentorModel:
         mentor = MentorModel(model="test-model", api_key="test-key")
         result = mentor.generate_initial_prompt(
             sample_data="Test data",
-            ground_truth="Test ground truth",
+            ground_truth={"firstname": "John"},  # Now dict
         )
         
         assert result.prompt == "Generated prompt"
@@ -119,13 +121,13 @@ class TestMentorModel:
         mock_client = MagicMock()
         mock_client.chat.return_value = GeneratedPrompt(
             prompt="Improved prompt",
-            reasoning="Based on errors",
+            reasoning="Based on history",
         )
         mock_client_cls.return_value = mock_client
         
         mentor = MentorModel(model="test-model", api_key="test-key")
+        # New signature: history instead of errors
         result = mentor.generate_prompt(
-            errors=[],
             history=[],
             current_prompt="Original prompt",
         )

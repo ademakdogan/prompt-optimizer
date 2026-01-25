@@ -2,11 +2,9 @@
 Pydantic schemas for Prompt Optimizer.
 
 This module defines data models for:
-- PII entity representation
-- API responses (structured outputs)
 - Error feedback for mentor model
 - Optimization tracking
-- Dynamic field descriptions
+- Generated prompt responses
 """
 
 from typing import Optional, Any
@@ -14,149 +12,12 @@ from typing import Optional, Any
 from pydantic import BaseModel, Field
 
 
-class FieldDescription(BaseModel):
-    """
-    Description for a PII field type, updated by mentor.
-
-    Attributes:
-        field_name: The name of the PII field (lowercase).
-        description: How to identify this field in text.
-        examples: Example values for this field.
-
-    Examples:
-        >>> field = FieldDescription(
-        ...     field_name="email",
-        ...     description="Email addresses in format user@domain.com",
-        ...     examples=["john@example.com", "test@mail.org"]
-        ... )
-        >>> field.field_name
-        'email'
-    """
-
-    field_name: str = Field(..., description="Name of the PII field (lowercase)")
-    description: str = Field(..., description="How to identify this field in text")
-    examples: list[str] = Field(
-        default_factory=list,
-        description="Example values for this field",
-    )
-
-
-class TargetResult(BaseModel):
-    """
-    Structured result with dynamic PII fields.
-
-    This model holds extracted PII values as key-value pairs.
-    All fields are optional since different texts have different PII types.
-
-    Examples:
-        >>> result = TargetResult(
-        ...     firstname="John",
-        ...     email="john@example.com",
-        ...     phonenumber="555-1234"
-        ... )
-        >>> result.email
-        'john@example.com'
-    """
-
-    # Common PII fields - all optional with dynamic descriptions
-    firstname: Optional[str] = Field(None, description="First name of a person")
-    lastname: Optional[str] = Field(None, description="Last name/surname of a person")
-    prefix: Optional[str] = Field(None, description="Title prefix like Mr., Mrs., Dr.")
-    email: Optional[str] = Field(None, description="Email address")
-    phonenumber: Optional[str] = Field(None, description="Phone number")
-    age: Optional[str] = Field(None, description="Age of a person")
-    street: Optional[str] = Field(None, description="Street address")
-    city: Optional[str] = Field(None, description="City name")
-    county: Optional[str] = Field(None, description="County or region name")
-    country: Optional[str] = Field(None, description="Country name")
-    zipcode: Optional[str] = Field(None, description="Postal/ZIP code")
-    
-    # Digital identifiers
-    username: Optional[str] = Field(None, description="Username or user ID")
-    password: Optional[str] = Field(None, description="Password")
-    pin: Optional[str] = Field(None, description="PIN code")
-    accountnumber: Optional[str] = Field(None, description="Bank or account number")
-    maskednumber: Optional[str] = Field(None, description="Masked credit card number (last 4 digits)")
-    
-    # Other PII types
-    time: Optional[str] = Field(None, description="Time value")
-    date: Optional[str] = Field(None, description="Date value")
-    amount: Optional[str] = Field(None, description="Monetary amount")
-    currency: Optional[str] = Field(None, description="Currency code (USD, EUR, etc.)")
-    jobtitle: Optional[str] = Field(None, description="Job title or position")
-    eyecolor: Optional[str] = Field(None, description="Eye color description")
-    
-    # Technical identifiers
-    nearbygpscoordinate: Optional[str] = Field(None, description="GPS coordinates")
-    useragent: Optional[str] = Field(None, description="Browser user agent string")
-    ipaddress: Optional[str] = Field(None, description="IP address")
-    url: Optional[str] = Field(None, description="URL or web address")
-
-    model_config = {"extra": "allow"}  # Allow additional fields
-
-
-class PIIEntity(BaseModel):
-    """
-    Represents a single PII (Personally Identifiable Information) entity.
-
-    Attributes:
-        value: The actual PII value found in text.
-        label: The category/type of PII (e.g., EMAIL, PHONE, FIRSTNAME).
-        start: Starting character position in source text.
-        end: Ending character position in source text.
-
-    Examples:
-        >>> entity = PIIEntity(
-        ...     value="john@example.com",
-        ...     label="EMAIL",
-        ...     start=10,
-        ...     end=26
-        ... )
-        >>> entity.label
-        'EMAIL'
-    """
-
-    value: str = Field(..., description="The actual PII value found in text")
-    label: str = Field(..., description="The category/type of PII")
-    start: int = Field(..., description="Starting character position")
-    end: int = Field(..., description="Ending character position")
-
-
-class PIIResponse(BaseModel):
-    """
-    Structured response from the agent model containing extracted PII entities.
-
-    Attributes:
-        entities: List of PII entities found in the text.
-        masked_text: The text with PII values replaced by labels.
-
-    Examples:
-        >>> response = PIIResponse(
-        ...     entities=[
-        ...         PIIEntity(value="John", label="FIRSTNAME", start=0, end=4)
-        ...     ],
-        ...     masked_text="[FIRSTNAME] works at Acme Inc."
-        ... )
-        >>> len(response.entities)
-        1
-    """
-
-    entities: list[PIIEntity] = Field(
-        default_factory=list,
-        description="List of PII entities found in the text",
-    )
-    masked_text: str = Field(
-        default="",
-        description="The text with PII values replaced by labels",
-    )
-
-
 class ErrorFeedback(BaseModel):
     """
     Error data sent to mentor model for analysis.
 
     Attributes:
-        field_name: The PII field/label that was incorrectly identified.
+        field_name: The field that was incorrectly identified.
         prompt: The prompt used for extraction.
         source_text: The original input text.
         agent_answer: The agent's incorrect response.
@@ -164,17 +25,17 @@ class ErrorFeedback(BaseModel):
 
     Examples:
         >>> error = ErrorFeedback(
-        ...     field_name="EMAIL",
-        ...     prompt="Extract PII from text",
+        ...     field_name="email",
+        ...     prompt="Extract data from text",
         ...     source_text="Contact me at test@email.com",
         ...     agent_answer="No email found",
         ...     ground_truth="test@email.com"
         ... )
         >>> error.field_name
-        'EMAIL'
+        'email'
     """
 
-    field_name: str = Field(..., description="The PII field that was incorrect")
+    field_name: str = Field(..., description="The field that was incorrect")
     prompt: str = Field(..., description="The prompt used for extraction")
     source_text: str = Field(..., description="The original input text")
     agent_answer: str = Field(..., description="The agent's response")
@@ -196,7 +57,7 @@ class OptimizationResult(BaseModel):
     Examples:
         >>> result = OptimizationResult(
         ...     iteration=1,
-        ...     prompt="Extract all PII entities",
+        ...     prompt="Extract all data fields",
         ...     accuracy=0.85,
         ...     total_samples=10,
         ...     correct_samples=8.5,
@@ -234,11 +95,11 @@ class PromptHistory(BaseModel):
     Examples:
         >>> history = PromptHistory(
         ...     iteration=1,
-        ...     prompt="Extract PII",
+        ...     prompt="Extract data",
         ...     accuracy=0.75,
-        ...     error_summary={"EMAIL": 2, "PHONE": 1}
+        ...     error_summary={"email": 2, "phone": 1}
         ... )
-        >>> history.error_summary["EMAIL"]
+        >>> history.error_summary["email"]
         2
     """
 
@@ -267,13 +128,13 @@ class MentorPromptRequest(BaseModel):
 
     Examples:
         >>> request = MentorPromptRequest(
-        ...     current_prompt="Extract PII",
+        ...     current_prompt="Extract data",
         ...     errors=[],
         ...     history=[],
-        ...     schema_description="JSON with entities array"
+        ...     schema_description="JSON with key-value pairs"
         ... )
         >>> request.current_prompt
-        'Extract PII'
+        'Extract data'
     """
 
     current_prompt: Optional[str] = Field(
@@ -309,11 +170,11 @@ class GeneratedPrompt(BaseModel):
 
     Examples:
         >>> generated = GeneratedPrompt(
-        ...     prompt="Extract all PII entities including names, emails...",
-        ...     reasoning="Added more specific entity types",
+        ...     prompt="Extract all key information including names, emails...",
+        ...     reasoning="Added more specific field types",
         ...     field_descriptions={"email": "Email in format user@domain.com"}
         ... )
-        >>> "PII" in generated.prompt
+        >>> "Extract" in generated.prompt
         True
     """
 
@@ -326,3 +187,18 @@ class GeneratedPrompt(BaseModel):
         default_factory=dict,
         description="Updated descriptions for each field to improve extraction",
     )
+
+
+# Legacy models kept for backward compatibility
+class PIIEntity(BaseModel):
+    """Legacy model - kept for backward compatibility."""
+    value: str = Field(..., description="The value found in text")
+    label: str = Field(..., description="The category/type")
+    start: int = Field(..., description="Starting character position")
+    end: int = Field(..., description="Ending character position")
+
+
+class PIIResponse(BaseModel):
+    """Legacy model - kept for backward compatibility."""
+    entities: list[PIIEntity] = Field(default_factory=list)
+    masked_text: str = Field(default="")
