@@ -6,11 +6,94 @@ This module defines data models for:
 - API responses (structured outputs)
 - Error feedback for mentor model
 - Optimization tracking
+- Dynamic field descriptions
 """
 
-from typing import Optional
+from typing import Optional, Any
 
 from pydantic import BaseModel, Field
+
+
+class FieldDescription(BaseModel):
+    """
+    Description for a PII field type, updated by mentor.
+
+    Attributes:
+        field_name: The name of the PII field (lowercase).
+        description: How to identify this field in text.
+        examples: Example values for this field.
+
+    Examples:
+        >>> field = FieldDescription(
+        ...     field_name="email",
+        ...     description="Email addresses in format user@domain.com",
+        ...     examples=["john@example.com", "test@mail.org"]
+        ... )
+        >>> field.field_name
+        'email'
+    """
+
+    field_name: str = Field(..., description="Name of the PII field (lowercase)")
+    description: str = Field(..., description="How to identify this field in text")
+    examples: list[str] = Field(
+        default_factory=list,
+        description="Example values for this field",
+    )
+
+
+class TargetResult(BaseModel):
+    """
+    Structured result with dynamic PII fields.
+
+    This model holds extracted PII values as key-value pairs.
+    All fields are optional since different texts have different PII types.
+
+    Examples:
+        >>> result = TargetResult(
+        ...     firstname="John",
+        ...     email="john@example.com",
+        ...     phonenumber="555-1234"
+        ... )
+        >>> result.email
+        'john@example.com'
+    """
+
+    # Common PII fields - all optional with dynamic descriptions
+    firstname: Optional[str] = Field(None, description="First name of a person")
+    lastname: Optional[str] = Field(None, description="Last name/surname of a person")
+    prefix: Optional[str] = Field(None, description="Title prefix like Mr., Mrs., Dr.")
+    email: Optional[str] = Field(None, description="Email address")
+    phonenumber: Optional[str] = Field(None, description="Phone number")
+    age: Optional[str] = Field(None, description="Age of a person")
+    street: Optional[str] = Field(None, description="Street address")
+    city: Optional[str] = Field(None, description="City name")
+    county: Optional[str] = Field(None, description="County or region name")
+    country: Optional[str] = Field(None, description="Country name")
+    zipcode: Optional[str] = Field(None, description="Postal/ZIP code")
+    
+    # Digital identifiers
+    username: Optional[str] = Field(None, description="Username or user ID")
+    password: Optional[str] = Field(None, description="Password")
+    pin: Optional[str] = Field(None, description="PIN code")
+    accountnumber: Optional[str] = Field(None, description="Bank or account number")
+    maskednumber: Optional[str] = Field(None, description="Masked credit card number (last 4 digits)")
+    
+    # Other PII types
+    time: Optional[str] = Field(None, description="Time value")
+    date: Optional[str] = Field(None, description="Date value")
+    amount: Optional[str] = Field(None, description="Monetary amount")
+    currency: Optional[str] = Field(None, description="Currency code (USD, EUR, etc.)")
+    jobtitle: Optional[str] = Field(None, description="Job title or position")
+    eyecolor: Optional[str] = Field(None, description="Eye color description")
+    
+    # Technical identifiers
+    nearbygpscoordinate: Optional[str] = Field(None, description="GPS coordinates")
+    useragent: Optional[str] = Field(None, description="Browser user agent string")
+    ipaddress: Optional[str] = Field(None, description="IP address")
+    url: Optional[str] = Field(None, description="URL or web address")
+
+    class Config:
+        extra = "allow"  # Allow additional fields
 
 
 class PIIEntity(BaseModel):
@@ -133,6 +216,10 @@ class OptimizationResult(BaseModel):
         default_factory=list,
         description="Errors found in this iteration",
     )
+    field_descriptions: dict[str, str] = Field(
+        default_factory=dict,
+        description="Updated field descriptions from mentor",
+    )
 
 
 class PromptHistory(BaseModel):
@@ -162,6 +249,10 @@ class PromptHistory(BaseModel):
     error_summary: dict[str, int] = Field(
         default_factory=dict,
         description="Count of errors per field type",
+    )
+    field_descriptions: dict[str, str] = Field(
+        default_factory=dict,
+        description="Field descriptions used in this iteration",
     )
 
 
@@ -202,20 +293,26 @@ class MentorPromptRequest(BaseModel):
         default="",
         description="Description of expected output schema",
     )
+    current_field_descriptions: dict[str, str] = Field(
+        default_factory=dict,
+        description="Current field descriptions to improve",
+    )
 
 
 class GeneratedPrompt(BaseModel):
     """
-    Response from mentor model with generated prompt.
+    Response from mentor model with generated prompt and field descriptions.
 
     Attributes:
         prompt: The generated or improved prompt text.
         reasoning: Explanation of changes made.
+        field_descriptions: Updated field descriptions for schema.
 
     Examples:
         >>> generated = GeneratedPrompt(
         ...     prompt="Extract all PII entities including names, emails...",
-        ...     reasoning="Added more specific entity types"
+        ...     reasoning="Added more specific entity types",
+        ...     field_descriptions={"email": "Email in format user@domain.com"}
         ... )
         >>> "PII" in generated.prompt
         True
@@ -225,4 +322,8 @@ class GeneratedPrompt(BaseModel):
     reasoning: str = Field(
         default="",
         description="Explanation of changes made",
+    )
+    field_descriptions: dict[str, str] = Field(
+        default_factory=dict,
+        description="Updated descriptions for each field to improve extraction",
     )

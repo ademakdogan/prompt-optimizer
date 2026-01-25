@@ -6,9 +6,12 @@ This module provides Pydantic models for:
 - API responses
 - Error feedback structures
 - Optimization results
+- Dynamic field descriptions
 """
 
 from prompt_optimizer.models.schemas import (
+    FieldDescription,
+    TargetResult,
     PIIEntity,
     PIIResponse,
     ErrorFeedback,
@@ -19,6 +22,8 @@ from prompt_optimizer.models.schemas import (
 )
 
 __all__ = [
+    "FieldDescription",
+    "TargetResult",
     "PIIEntity",
     "PIIResponse",
     "ErrorFeedback",
@@ -27,3 +32,4 @@ __all__ = [
     "MentorPromptRequest",
     "GeneratedPrompt",
 ]
+

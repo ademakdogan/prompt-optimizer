@@ -5,7 +5,7 @@ This module provides the main optimization loop that:
 1. Processes data with current prompt
 2. Evaluates against ground truth
 3. Collects errors for mentor feedback
-4. Generates improved prompts
+4. Generates improved prompts with updated field descriptions
 """
 
 from prompt_optimizer.api import AgentModel, MentorModel
@@ -14,7 +14,7 @@ from prompt_optimizer.core.evaluator import Evaluator, EvaluationResult
 from prompt_optimizer.models import (
     ErrorFeedback,
     OptimizationResult,
-    PIIResponse,
+    TargetResult,
     PromptHistory,
 )
 from prompt_optimizer.utils.logging import get_logger
@@ -28,6 +28,7 @@ class PromptOptimizer:
 
     Coordinates the agent model, mentor model, and evaluator
     to iteratively improve prompts for PII extraction.
+    The mentor also updates field descriptions to improve schema understanding.
 
     Attributes:
         agent: The agent model for processing data.
@@ -35,12 +36,13 @@ class PromptOptimizer:
         evaluator: The evaluator for comparing responses.
         window_size: Number of historical iterations to send to mentor.
         loop_count: Total number of optimization iterations.
+        field_descriptions: Current field descriptions from mentor.
 
     Examples:
         >>> optimizer = PromptOptimizer()
         >>> # Run optimization with test data
         >>> results = optimizer.optimize(
-        ...     data=[("Sample text with john@email.com", ground_truth)],
+        ...     data=[("Sample text with john@email.com", target_result)],
         ...     initial_prompt="Extract PII entities"
         ... )
         >>> len(results) > 0
@@ -75,6 +77,7 @@ class PromptOptimizer:
         self.evaluator = Evaluator()
         
         self.history: list[PromptHistory] = []
+        self.field_descriptions: dict[str, str] = {}
         
         logger.info(
             f"Initialized PromptOptimizer: "
@@ -83,7 +86,7 @@ class PromptOptimizer:
 
     def optimize(
         self,
-        data: list[tuple[str, PIIResponse]],
+        data: list[tuple[str, TargetResult]],
         initial_prompt: str | None = None,
         schema_description: str = "",
     ) -> list[OptimizationResult]:
@@ -91,7 +94,7 @@ class PromptOptimizer:
         Run the optimization loop.
 
         Args:
-            data: List of (source_text, ground_truth) tuples.
+            data: List of (source_text, target_result) tuples.
             initial_prompt: Starting prompt. If None, mentor generates one.
             schema_description: Description of expected output schema.
 
@@ -100,7 +103,7 @@ class PromptOptimizer:
 
         Examples:
             >>> optimizer = PromptOptimizer()
-            >>> data = [("Contact john@email.com", ground_truth)]
+            >>> data = [("Contact john@email.com", target_result)]
             >>> results = optimizer.optimize(data)
             >>> len(results) == optimizer.loop_count
             True
@@ -118,6 +121,13 @@ class PromptOptimizer:
         for iteration in range(1, self.loop_count + 1):
             logger.info(f"\n{'='*50}\nIteration {iteration}/{self.loop_count}\n{'='*50}")
             logger.info(f"Current prompt:\n{current_prompt}")
+            
+            if self.field_descriptions:
+                logger.info(f"Current field descriptions: {list(self.field_descriptions.keys())}")
+            
+            # Update agent with current field descriptions
+            if self.field_descriptions:
+                self.agent.update_field_descriptions(self.field_descriptions)
             
             # Process all data with current prompt
             responses = self._process_all_data(data, current_prompt, schema_description)
@@ -148,6 +158,7 @@ class PromptOptimizer:
                 total_samples=len(data),
                 correct_samples=sum(r.accuracy for r in eval_results),
                 errors=errors,
+                field_descriptions=self.field_descriptions.copy(),
             )
             results.append(result)
             
@@ -157,6 +168,7 @@ class PromptOptimizer:
                 prompt=current_prompt,
                 accuracy=accuracy,
                 error_summary=error_summary,
+                field_descriptions=self.field_descriptions.copy(),
             )
             self.history.append(history_entry)
             
@@ -181,7 +193,7 @@ class PromptOptimizer:
 
     def _generate_initial_prompt(
         self,
-        data: list[tuple[str, PIIResponse]],
+        data: list[tuple[str, TargetResult]],
         schema_description: str,
     ) -> str:
         """
@@ -195,19 +207,25 @@ class PromptOptimizer:
             str: Generated initial prompt.
         """
         # Use first sample for initial prompt generation
-        sample_text, ground_truth = data[0]
+        sample_text, target_result = data[0]
         
-        # Convert ground truth to readable format
-        gt_str = self._format_ground_truth(ground_truth)
+        # Convert target result to JSON-like format
+        gt_str = self._format_target_result(target_result)
         
         generated = self.mentor.generate_initial_prompt(
             sample_data=sample_text,
             ground_truth=gt_str,
             schema_description=schema_description,
+            current_field_descriptions=self.field_descriptions,
         )
         
         logger.info(f"Generated initial prompt:\n{generated.prompt}")
         logger.info(f"Reasoning: {generated.reasoning}")
+        
+        # Update field descriptions from mentor
+        if generated.field_descriptions:
+            self.field_descriptions.update(generated.field_descriptions)
+            logger.info(f"Field descriptions updated: {list(generated.field_descriptions.keys())}")
         
         return generated.prompt
 
@@ -236,29 +254,35 @@ class PromptOptimizer:
             history=history_window,
             current_prompt=current_prompt,
             schema_description=schema_description,
+            current_field_descriptions=self.field_descriptions,
         )
         
         logger.info(f"Generated improved prompt:\n{generated.prompt}")
         logger.info(f"Reasoning: {generated.reasoning}")
         
+        # Update field descriptions from mentor
+        if generated.field_descriptions:
+            self.field_descriptions.update(generated.field_descriptions)
+            logger.info(f"Field descriptions updated: {list(generated.field_descriptions.keys())}")
+        
         return generated.prompt
 
     def _process_all_data(
         self,
-        data: list[tuple[str, PIIResponse]],
+        data: list[tuple[str, TargetResult]],
         prompt: str,
         schema_description: str,
-    ) -> list[PIIResponse]:
+    ) -> list[TargetResult]:
         """
         Process all data samples with the agent.
 
         Args:
-            data: List of (source_text, ground_truth) tuples.
+            data: List of (source_text, target_result) tuples.
             prompt: The prompt to use.
             schema_description: Schema description.
 
         Returns:
-            list[PIIResponse]: Agent responses for all samples.
+            list[TargetResult]: Agent responses for all samples.
         """
         responses = []
         
@@ -275,29 +299,30 @@ class PromptOptimizer:
             except Exception as e:
                 logger.error(f"Error processing sample {i+1}: {e}")
                 # Return empty response on error
-                responses.append(PIIResponse(entities=[], masked_text=""))
+                responses.append(TargetResult())
         
         return responses
 
-    def _format_ground_truth(self, ground_truth: PIIResponse) -> str:
+    def _format_target_result(self, target_result: TargetResult) -> str:
         """
-        Format ground truth for display.
+        Format target result for display.
 
         Args:
-            ground_truth: The ground truth response.
+            target_result: The target result to format.
 
         Returns:
-            str: Formatted string representation.
+            str: JSON-like formatted string.
         """
-        entities_str = "\n".join(
-            f"  - {e.label}: {e.value} (position: {e.start}-{e.end})"
-            for e in ground_truth.entities
-        )
+        fields = {
+            k: v for k, v in target_result.model_dump().items() if v is not None
+        }
         
-        return f"""Entities:
-{entities_str}
-
-Masked text: {ground_truth.masked_text}"""
+        lines = ["{"]
+        for field, value in fields.items():
+            lines.append(f'  "{field}": "{value}",')
+        lines.append("}")
+        
+        return "\n".join(lines)
 
     def _log_iteration_result(self, result: OptimizationResult) -> None:
         """
@@ -312,6 +337,7 @@ Accuracy: {result.accuracy:.2%}
 Correct samples: {result.correct_samples:.1f}/{result.total_samples}
 Error types: {len(result.errors)}
 Prompt length: {len(result.prompt)} chars
+Field descriptions: {len(result.field_descriptions)}
 """)
 
     def _log_final_summary(self, results: list[OptimizationResult]) -> None:
@@ -343,3 +369,8 @@ Accuracy progression:
         
         logger.info(f"\nBest prompt (iteration {best_result.iteration}):")
         logger.info(best_result.prompt)
+        
+        if best_result.field_descriptions:
+            logger.info(f"\nFinal field descriptions:")
+            for field, desc in best_result.field_descriptions.items():
+                logger.info(f"  {field}: {desc}")

@@ -2,7 +2,8 @@
 Mentor model handler for generating and improving prompts.
 
 The mentor model analyzes errors and historical performance to
-generate improved prompts for the agent model.
+generate improved prompts for the agent model. It also updates
+field descriptions in the schema to improve extraction accuracy.
 """
 
 from prompt_optimizer.api.client import OpenRouterClient
@@ -22,7 +23,8 @@ class MentorModel:
     Mentor model for generating and improving prompts.
 
     The mentor analyzes error patterns and historical performance
-    to generate optimized prompts for the agent model.
+    to generate optimized prompts for the agent model. It also
+    updates field descriptions to improve schema understanding.
 
     Attributes:
         client: The OpenRouter client instance.
@@ -57,6 +59,7 @@ class MentorModel:
         sample_data: str,
         ground_truth: str,
         schema_description: str = "",
+        current_field_descriptions: dict[str, str] | None = None,
     ) -> GeneratedPrompt:
         """
         Generate an initial prompt when no starting prompt is provided.
@@ -65,19 +68,23 @@ class MentorModel:
             sample_data: Example input data for the task.
             ground_truth: Expected output for the sample data.
             schema_description: Description of the expected output schema.
+            current_field_descriptions: Current field descriptions to start with.
 
         Returns:
-            GeneratedPrompt: Generated prompt with reasoning.
+            GeneratedPrompt: Generated prompt with reasoning and field descriptions.
 
         Examples:
             >>> mentor = MentorModel()
             >>> result = mentor.generate_initial_prompt(
             ...     sample_data="Contact John at john@email.com",
-            ...     ground_truth='{"entities": [{"label": "FIRSTNAME"}]}'
+            ...     ground_truth='{"firstname": "John", "email": "john@email.com"}'
             ... )
             >>> len(result.prompt) > 0
             True
         """
+        logger.info("=" * 60)
+        logger.info("SEND MESSAGE TO MENTOR")
+        logger.info("=" * 60)
         logger.info("Generating initial prompt from sample data")
         
         system_message = """You are an expert prompt engineer specializing in PII extraction tasks.
@@ -89,25 +96,43 @@ The prompt should:
 1. Be specific about what types of PII to look for
 2. Provide clear instructions on the output format
 3. Include guidance on edge cases
-4. Be concise but comprehensive"""
+4. Be concise but comprehensive
+
+You must also provide improved descriptions for each field type to help
+the AI better understand what to extract. These descriptions will be used
+in the JSON schema to guide structured output parsing."""
+
+        field_desc_section = ""
+        if current_field_descriptions:
+            field_desc_section = f"""
+
+CURRENT FIELD DESCRIPTIONS (improve these):
+{self._format_field_descriptions(current_field_descriptions)}
+"""
 
         user_message = f"""Create a professional prompt for PII extraction based on this example:
 
 SAMPLE INPUT:
 {sample_data}
 
-EXPECTED OUTPUT (ground truth):
+EXPECTED OUTPUT (target_result as JSON):
 {ground_truth}
 
 {f"OUTPUT SCHEMA: {schema_description}" if schema_description else ""}
+{field_desc_section}
 
 Generate a prompt that would produce this expected output when given the sample input.
+Also provide improved descriptions for each field type that appears in the expected output.
+These descriptions should help the AI understand exactly what to look for.
+
 Explain your reasoning for the prompt design."""
 
         messages = [
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_message},
         ]
+        
+        logger.info(f"User message to mentor:\n{user_message[:500]}...")
         
         response = self.client.chat(
             messages=messages,
@@ -116,6 +141,8 @@ Explain your reasoning for the prompt design."""
         )
         
         logger.info(f"Generated initial prompt: {response.prompt[:100]}...")
+        if response.field_descriptions:
+            logger.info(f"Updated field descriptions: {list(response.field_descriptions.keys())}")
         return response
 
     def generate_prompt(
@@ -124,6 +151,7 @@ Explain your reasoning for the prompt design."""
         history: list[PromptHistory],
         current_prompt: str | None = None,
         schema_description: str = "",
+        current_field_descriptions: dict[str, str] | None = None,
     ) -> GeneratedPrompt:
         """
         Generate an improved prompt based on errors and history.
@@ -133,9 +161,10 @@ Explain your reasoning for the prompt design."""
             history: Historical prompt performance (limited by window_size).
             current_prompt: The current prompt being used.
             schema_description: Description of the expected output schema.
+            current_field_descriptions: Current field descriptions to improve.
 
         Returns:
-            GeneratedPrompt: Improved prompt with reasoning.
+            GeneratedPrompt: Improved prompt with reasoning and updated field descriptions.
 
         Examples:
             >>> mentor = MentorModel()
@@ -154,6 +183,9 @@ Explain your reasoning for the prompt design."""
             >>> len(result.prompt) > 0
             True
         """
+        logger.info("=" * 60)
+        logger.info("SEND MESSAGE TO MENTOR")
+        logger.info("=" * 60)
         logger.info(f"Generating improved prompt with {len(errors)} errors")
         
         system_message = """You are an expert prompt engineer analyzing PII extraction errors.
@@ -164,12 +196,25 @@ Your task is to improve the current prompt based on:
 3. Patterns in what the agent is missing or misidentifying
 
 Generate an improved prompt that addresses these issues while maintaining 
-good performance on previously correct extractions."""
+good performance on previously correct extractions.
+
+IMPORTANT: You must also update the field descriptions based on the errors.
+If a field is frequently missed or misidentified, improve its description
+to make it clearer what the field looks for. These descriptions will be
+used in the JSON schema for structured output parsing."""
 
         # Build error summary
         error_text = self._format_errors(errors)
         history_text = self._format_history(history)
         
+        field_desc_section = ""
+        if current_field_descriptions:
+            field_desc_section = f"""
+
+CURRENT FIELD DESCRIPTIONS (update these based on errors):
+{self._format_field_descriptions(current_field_descriptions)}
+"""
+
         user_message = f"""Analyze these extraction errors and improve the prompt:
 
 CURRENT PROMPT:
@@ -182,14 +227,18 @@ HISTORICAL PERFORMANCE:
 {history_text}
 
 {f"OUTPUT SCHEMA: {schema_description}" if schema_description else ""}
+{field_desc_section}
 
 Generate an improved prompt that addresses the identified issues.
+Also update the field descriptions for any fields that have errors.
 Be specific about what changes you're making and why."""
 
         messages = [
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_message},
         ]
+        
+        logger.info(f"User message to mentor:\n{user_message[:500]}...")
         
         response = self.client.chat(
             messages=messages,
@@ -198,6 +247,8 @@ Be specific about what changes you're making and why."""
         )
         
         logger.info(f"Generated improved prompt: {response.prompt[:100]}...")
+        if response.field_descriptions:
+            logger.info(f"Updated field descriptions: {list(response.field_descriptions.keys())}")
         return response
 
     def _format_errors(self, errors: list[ErrorFeedback]) -> str:
@@ -247,4 +298,22 @@ Iteration {entry.iteration}:
 - Prompt: {entry.prompt[:100]}...
 - Error types: {error_counts or "None"}
 """)
+        return "\n".join(lines)
+
+    def _format_field_descriptions(self, descriptions: dict[str, str]) -> str:
+        """
+        Format field descriptions for the mentor prompt.
+
+        Args:
+            descriptions: Dict mapping field names to descriptions.
+
+        Returns:
+            str: Formatted field descriptions text.
+        """
+        if not descriptions:
+            return "No field descriptions provided."
+        
+        lines = []
+        for field, desc in descriptions.items():
+            lines.append(f"- {field}: {desc}")
         return "\n".join(lines)

@@ -1,60 +1,50 @@
 [
   {
     "source_text": "The wellness portal is accessible at [-71.6702,-107.6572]. With numerous wellness tracks suitable for everyone in the family, enrol now! Contact us at Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:12.5) Gecko/20100101 Firefox/12.5.9 for further details.",
-    "target_text": "The wellness portal is accessible at [NEARBYGPSCOORDINATE]. With numerous wellness tracks suitable for everyone in the family, enrol now! Contact us at [USERAGENT] for further details.",
-    "privacy_mask": [
-      {"value": "[-71.6702,-107.6572]", "start": 37, "end": 57, "label": "NEARBYGPSCOORDINATE"},
-      {"value": "Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:12.5) Gecko/20100101 Firefox/12.5.9", "start": 151, "end": 234, "label": "USERAGENT"}
-    ],
-    "language": "en"
+    "target_result": {
+      "nearbygpscoordinate": "[-71.6702,-107.6572]",
+      "useragent": "Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:12.5) Gecko/20100101 Firefox/12.5.9"
+    }
   },
   {
     "source_text": "Carleton, the new interactive educational tools are set to arrive at [-38.9302,113.5422]. Your password for accessing online content: yZqd7gHyZq91.",
-    "target_text": "[FIRSTNAME], the new interactive educational tools are set to arrive at [NEARBYGPSCOORDINATE]. Your password for accessing online content: [PASSWORD].",
-    "privacy_mask": [
-      {"value": "Carleton", "start": 0, "end": 8, "label": "FIRSTNAME"},
-      {"value": "[-38.9302,113.5422]", "start": 69, "end": 88, "label": "NEARBYGPSCOORDINATE"},
-      {"value": "yZqd7gHyZq91", "start": 134, "end": 146, "label": "PASSWORD"}
-    ],
-    "language": "en"
+    "target_result": {
+      "firstname": "Carleton",
+      "nearbygpscoordinate": "[-38.9302,113.5422]",
+      "password": "yZqd7gHyZq91"
+    }
   },
   {
     "source_text": "1. Customer query received at 10:18 PM from Human Group Coordinator of Cleveland based firm. The customer's email is Emilie_Beatty53@hotmail.com. Use our account number 63652332 for all financial exchanges. For personal discussions, ensure privacy with PIN - 8824 and EYECOLOR - Eye color: Brown.",
-    "target_text": "1. Customer query received at [TIME] from [JOBTITLE] of [COUNTY] based firm. The customer's email is [EMAIL]. Use our account number [ACCOUNTNUMBER] for all financial exchanges. For personal discussions, ensure privacy with PIN - [PIN] and EYECOLOR - [EYECOLOR].",
-    "privacy_mask": [
-      {"value": "10:18 PM", "start": 30, "end": 38, "label": "TIME"},
-      {"value": "Human Group Coordinator", "start": 44, "end": 67, "label": "JOBTITLE"},
-      {"value": "Cleveland", "start": 71, "end": 80, "label": "COUNTY"},
-      {"value": "Emilie_Beatty53@hotmail.com", "start": 117, "end": 144, "label": "EMAIL"},
-      {"value": "63652332", "start": 169, "end": 177, "label": "ACCOUNTNUMBER"},
-      {"value": "8824", "start": 259, "end": 263, "label": "PIN"},
-      {"value": "Eye color: Brown", "start": 279, "end": 295, "label": "EYECOLOR"}
-    ],
-    "language": "en"
+    "target_result": {
+      "time": "10:18 PM",
+      "jobtitle": "Human Group Coordinator",
+      "county": "Cleveland",
+      "email": "Emilie_Beatty53@hotmail.com",
+      "accountnumber": "63652332",
+      "pin": "8824",
+      "eyecolor": "Eye color: Brown"
+    }
   },
   {
     "source_text": "Dear Mr. Vandervort, congratulations on turning 68! Your unique ID at our wellness center is 0Zr2bcG1X9Ub. Visit us at 609 Gorczany Pass for more personalized programs.",
-    "target_text": "Dear [PREFIX] [LASTNAME], congratulations on turning [AGE]! Your unique ID at our wellness center is [USERNAME]. Visit us at [STREET] for more personalized programs.",
-    "privacy_mask": [
-      {"value": "Mr.", "start": 5, "end": 8, "label": "PREFIX"},
-      {"value": "Vandervort", "start": 9, "end": 19, "label": "LASTNAME"},
-      {"value": "68", "start": 48, "end": 50, "label": "AGE"},
-      {"value": "0Zr2bcG1X9Ub", "start": 93, "end": 105, "label": "USERNAME"},
-      {"value": "609 Gorczany Pass", "start": 120, "end": 137, "label": "STREET"}
-    ],
-    "language": "en"
+    "target_result": {
+      "prefix": "Mr.",
+      "lastname": "Vandervort",
+      "age": "68",
+      "username": "0Zr2bcG1X9Ub",
+      "street": "609 Gorczany Pass"
+    }
   },
   {
     "source_text": "Please reach out to Janessa at janessa.smith@company.org or call 555-0123 for the latest updates on your order #ORD-7842. Payment of $1,250.00 USD was processed using card ending in 4532.",
-    "target_text": "Please reach out to [FIRSTNAME] at [EMAIL] or call [PHONENUMBER] for the latest updates on your order #ORD-7842. Payment of [AMOUNT] [CURRENCY] was processed using card ending in [MASKEDNUMBER].",
-    "privacy_mask": [
-      {"value": "Janessa", "start": 20, "end": 27, "label": "FIRSTNAME"},
-      {"value": "janessa.smith@company.org", "start": 31, "end": 56, "label": "EMAIL"},
-      {"value": "555-0123", "start": 65, "end": 73, "label": "PHONENUMBER"},
-      {"value": "$1,250.00", "start": 133, "end": 142, "label": "AMOUNT"},
-      {"value": "USD", "start": 143, "end": 146, "label": "CURRENCY"},
-      {"value": "4532", "start": 183, "end": 187, "label": "MASKEDNUMBER"}
-    ],
-    "language": "en"
+    "target_result": {
+      "firstname": "Janessa",
+      "email": "janessa.smith@company.org",
+      "phonenumber": "555-0123",
+      "amount": "$1,250.00",
+      "currency": "USD",
+      "maskednumber": "4532"
+    }
   }
 ]

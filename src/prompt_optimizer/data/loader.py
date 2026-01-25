@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 from typing import Iterator
 
-from prompt_optimizer.models import PIIEntity, PIIResponse
+from prompt_optimizer.models import TargetResult
 from prompt_optimizer.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -23,7 +23,7 @@ class DataLoader:
     to parse ground truth into structured format.
 
     Examples:
-        >>> loader = DataLoader("resources/pii/english_pii_43k.jsonl")
+        >>> loader = DataLoader("resources/test_data.json")
         >>> samples = loader.load_samples(limit=5)
         >>> len(samples) == 5
         True
@@ -57,7 +57,7 @@ class DataLoader:
             list[dict]: List of sample dictionaries.
 
         Examples:
-            >>> loader = DataLoader("test_data.jsonl")
+            >>> loader = DataLoader("test_data.json")
             >>> samples = loader.load_samples(limit=10)
             >>> all("source_text" in s for s in samples)
             True
@@ -114,42 +114,29 @@ class DataLoader:
             return [data]
 
     @staticmethod
-    def parse_ground_truth(sample: dict) -> PIIResponse:
+    def parse_target_result(sample: dict) -> TargetResult:
         """
-        Parse a sample's ground truth into a PIIResponse.
+        Parse a sample's target_result into a TargetResult model.
 
         Args:
-            sample: A sample dictionary containing privacy_mask and target_text.
+            sample: A sample dictionary containing target_result.
 
         Returns:
-            PIIResponse: Structured ground truth response.
+            TargetResult: Structured ground truth response.
 
         Examples:
             >>> sample = {
-            ...     "privacy_mask": [
-            ...         {"value": "John", "label": "FIRSTNAME", "start": 0, "end": 4}
-            ...     ],
-            ...     "target_text": "[FIRSTNAME] works here"
+            ...     "target_result": {
+            ...         "firstname": "John",
+            ...         "email": "john@email.com"
+            ...     }
             ... }
-            >>> result = DataLoader.parse_ground_truth(sample)
-            >>> result.entities[0].label
-            'FIRSTNAME'
+            >>> result = DataLoader.parse_target_result(sample)
+            >>> result.firstname
+            'John'
         """
-        entities = []
-        
-        privacy_mask = sample.get("privacy_mask", [])
-        for mask in privacy_mask:
-            entity = PIIEntity(
-                value=mask.get("value", ""),
-                label=mask.get("label", ""),
-                start=mask.get("start", 0),
-                end=mask.get("end", 0),
-            )
-            entities.append(entity)
-        
-        masked_text = sample.get("target_text", "")
-        
-        return PIIResponse(entities=entities, masked_text=masked_text)
+        target_result_data = sample.get("target_result", {})
+        return TargetResult(**target_result_data)
 
     @staticmethod
     def get_source_text(sample: dict) -> str:
@@ -173,7 +160,7 @@ class DataLoader:
 def load_test_data(
     file_path: str | Path,
     limit: int = 5,
-) -> list[tuple[str, PIIResponse]]:
+) -> list[tuple[str, TargetResult]]:
     """
     Convenience function to load test data with ground truth.
 
@@ -182,13 +169,13 @@ def load_test_data(
         limit: Number of samples to load.
 
     Returns:
-        list[tuple[str, PIIResponse]]: List of (source_text, ground_truth) tuples.
+        list[tuple[str, TargetResult]]: List of (source_text, target_result) tuples.
 
     Examples:
-        >>> data = load_test_data("resources/pii/english_pii_43k.jsonl", limit=5)
+        >>> data = load_test_data("resources/test_data.json", limit=5)
         >>> len(data) == 5
         True
-        >>> isinstance(data[0][1], PIIResponse)
+        >>> isinstance(data[0][1], TargetResult)
         True
     """
     loader = DataLoader(file_path)
@@ -197,7 +184,7 @@ def load_test_data(
     result = []
     for sample in samples:
         source_text = DataLoader.get_source_text(sample)
-        ground_truth = DataLoader.parse_ground_truth(sample)
-        result.append((source_text, ground_truth))
+        target_result = DataLoader.parse_target_result(sample)
+        result.append((source_text, target_result))
     
     return result
