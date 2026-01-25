@@ -78,7 +78,7 @@ class TestCalculateMetrics:
         assert metrics.best_accuracy == 0.90
         assert metrics.best_iteration == 2
         assert metrics.final_accuracy == 0.85
-        assert metrics.accuracy_improvement == 0.15  # 0.85 - 0.70
+        assert metrics.accuracy_improvement == pytest.approx(0.15)  # 0.85 - 0.70
 
 
 class TestFormatMetricsReport:
