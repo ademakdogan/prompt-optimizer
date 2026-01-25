@@ -92,8 +92,7 @@ class TargetResult(BaseModel):
     ipaddress: Optional[str] = Field(None, description="IP address")
     url: Optional[str] = Field(None, description="URL or web address")
 
-    class Config:
-        extra = "allow"  # Allow additional fields
+    model_config = {"extra": "allow"}  # Allow additional fields
 
 
 class PIIEntity(BaseModel):

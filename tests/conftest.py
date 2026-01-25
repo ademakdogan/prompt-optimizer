@@ -8,57 +8,21 @@ from typing import Generator
 
 import pytest
 
-from prompt_optimizer.models import PIIEntity, PIIResponse
+from prompt_optimizer.models import TargetResult
 
 
 @pytest.fixture
-def sample_pii_entity() -> PIIEntity:
+def sample_target_result() -> TargetResult:
     """
-    Create a sample PIIEntity for testing.
+    Create a sample TargetResult for testing.
 
     Returns:
-        PIIEntity: A test entity with email data.
+        TargetResult: A test result with PII data.
     """
-    return PIIEntity(
-        value="test@example.com",
-        label="EMAIL",
-        start=10,
-        end=26,
-    )
-
-
-@pytest.fixture
-def sample_pii_response(sample_pii_entity: PIIEntity) -> PIIResponse:
-    """
-    Create a sample PIIResponse for testing.
-
-    Args:
-        sample_pii_entity: A sample entity.
-
-    Returns:
-        PIIResponse: A test response.
-    """
-    return PIIResponse(
-        entities=[sample_pii_entity],
-        masked_text="Contact: [EMAIL] for info.",
-    )
-
-
-@pytest.fixture
-def sample_ground_truth() -> PIIResponse:
-    """
-    Create sample ground truth for testing.
-
-    Returns:
-        PIIResponse: Ground truth with multiple entity types.
-    """
-    return PIIResponse(
-        entities=[
-            PIIEntity(value="John", label="FIRSTNAME", start=0, end=4),
-            PIIEntity(value="test@example.com", label="EMAIL", start=20, end=36),
-            PIIEntity(value="555-1234", label="PHONENUMBER", start=45, end=53),
-        ],
-        masked_text="[FIRSTNAME] contact: [EMAIL] phone: [PHONENUMBER]",
+    return TargetResult(
+        firstname="John",
+        email="test@example.com",
+        phonenumber="555-1234",
     )
 
 
@@ -76,18 +40,17 @@ def sample_source_text() -> str:
 @pytest.fixture
 def sample_data_entry() -> dict:
     """
-    Create a sample data entry as loaded from JSONL.
+    Create a sample data entry as loaded from JSON.
 
     Returns:
         dict: A sample data entry.
     """
     return {
         "source_text": "Contact John at john@email.com for details.",
-        "target_text": "Contact [FIRSTNAME] at [EMAIL] for details.",
-        "privacy_mask": [
-            {"value": "John", "label": "FIRSTNAME", "start": 8, "end": 12},
-            {"value": "john@email.com", "label": "EMAIL", "start": 16, "end": 30},
-        ],
+        "target_result": {
+            "firstname": "John",
+            "email": "john@email.com",
+        },
     }
 
 

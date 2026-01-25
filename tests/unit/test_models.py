@@ -50,10 +50,16 @@ class TestPIIEntity:
 class TestPIIResponse:
     """Tests for PIIResponse model."""
 
-    def test_create_response(self, sample_pii_entity: PIIEntity) -> None:
+    def test_create_response(self) -> None:
         """Test creating a PIIResponse."""
+        entity = PIIEntity(
+            value="test@email.com",
+            label="EMAIL",
+            start=9,
+            end=23,
+        )
         response = PIIResponse(
-            entities=[sample_pii_entity],
+            entities=[entity],
             masked_text="Contact: [EMAIL]",
         )
         

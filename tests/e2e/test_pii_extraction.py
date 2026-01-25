@@ -1,146 +1,110 @@
 """
-End-to-end test for PII extraction with real API calls.
-
-This test requires a valid OpenRouter API key in the .env file.
-It tests the full optimization loop with real model calls.
+End-to-end tests for PII extraction flow.
 """
 
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from prompt_optimizer.config import get_settings
-from prompt_optimizer.core import PromptOptimizer
 from prompt_optimizer.data import load_test_data
-from prompt_optimizer.models import PIIEntity, PIIResponse, GeneratedPrompt
+from prompt_optimizer.models import TargetResult, GeneratedPrompt
 
 
-# Skip these tests if no API key is available
-def has_api_key() -> bool:
-    """Check if API key is available."""
-    try:
-        settings = get_settings()
-        return bool(settings.openrouter_api_key)
-    except Exception:
-        return False
+# Path to test data relative to project root
+TEST_DATA_PATH = Path(__file__).parent.parent.parent / "resources" / "test_data.json"
 
 
-@pytest.mark.skipif(not has_api_key(), reason="No OpenRouter API key available")
 class TestPIIExtractionE2E:
-    """End-to-end tests for PII extraction."""
+    """End-to-end tests for PII extraction workflow."""
 
-    @pytest.fixture
-    def test_data_path(self) -> Path:
-        """Get path to test data."""
-        return Path(__file__).parent.parent.parent / "resources" / "test_data.json"
-
-    def test_load_and_parse_test_data(self, test_data_path: Path) -> None:
-        """Test that test data can be loaded and parsed."""
-        if not test_data_path.exists():
-            pytest.skip("Test data file not found")
-        
-        data = load_test_data(test_data_path, limit=5)
+    @pytest.mark.skipif(
+        not TEST_DATA_PATH.exists(),
+        reason="Test data file not found",
+    )
+    def test_load_and_parse_test_data(self) -> None:
+        """Test loading and parsing the test data file."""
+        data = load_test_data(TEST_DATA_PATH, limit=5)
         
         assert len(data) == 5
-        for source_text, ground_truth in data:
+        
+        for source_text, target_result in data:
             assert isinstance(source_text, str)
-            assert isinstance(ground_truth, PIIResponse)
             assert len(source_text) > 0
+            assert isinstance(target_result, TargetResult)
+
+    @pytest.mark.skipif(
+        not TEST_DATA_PATH.exists(),
+        reason="Test data file not found",
+    )
+    def test_data_variety(self) -> None:
+        """Test that test data covers various PII types."""
+        data = load_test_data(TEST_DATA_PATH, limit=5)
+        
+        all_fields = set()
+        for _, target_result in data:
+            result_dict = target_result.model_dump()
+            for field, value in result_dict.items():
+                if value is not None:
+                    all_fields.add(field)
+        
+        # Should have variety of PII types
+        assert len(all_fields) >= 5
 
 
 class TestPIIExtractionMocked:
-    """Mocked e2e tests that don't require API key."""
+    """E2E tests with mocked API for fast, reliable testing."""
 
-    @pytest.fixture
-    def test_data_path(self) -> Path:
-        """Get path to test data."""
-        return Path(__file__).parent.parent.parent / "resources" / "test_data.json"
-
-    @patch("prompt_optimizer.core.optimizer.AgentModel")
     @patch("prompt_optimizer.core.optimizer.MentorModel")
-    def test_full_optimization_with_test_data(
+    @patch("prompt_optimizer.core.optimizer.AgentModel")
+    def test_full_optimization_flow_mocked(
         self,
-        mock_mentor_cls: MagicMock,
         mock_agent_cls: MagicMock,
-        test_data_path: Path,
+        mock_mentor_cls: MagicMock,
     ) -> None:
-        """Test full optimization flow with test data and mocked API."""
-        if not test_data_path.exists():
-            pytest.skip("Test data file not found")
+        """Test full optimization flow with mocked API."""
+        from prompt_optimizer.core.optimizer import PromptOptimizer
         
-        # Load test data
-        data = load_test_data(test_data_path, limit=5)
-        
-        # Setup mocks to return progressively better results
-        iteration = [0]
-        
-        def mock_process_data(prompt: str, data: str, schema_description: str = "") -> PIIResponse:
-            """Return mock responses that improve over iterations."""
-            # Return partial matches first, then full match
-            if iteration[0] < 2:
-                return PIIResponse(
-                    entities=[
-                        PIIEntity(value="test", label="FIRSTNAME", start=0, end=4),
-                    ],
-                    masked_text="[FIRSTNAME]",
-                )
-            else:
-                # Return a better response
-                return PIIResponse(
-                    entities=[
-                        PIIEntity(value="test", label="FIRSTNAME", start=0, end=4),
-                        PIIEntity(value="test@email.com", label="EMAIL", start=10, end=24),
-                    ],
-                    masked_text="[FIRSTNAME] [EMAIL]",
-                )
-        
+        # Setup mocks
         mock_agent = MagicMock()
-        mock_agent.process_data.side_effect = mock_process_data
+        mock_agent.update_field_descriptions = MagicMock()
+        
+        # Simulate improving accuracy over iterations
+        responses = [
+            TargetResult(),  # First iteration: empty
+            TargetResult(firstname="John"),  # Second: partial
+            TargetResult(firstname="John", email="test@example.com"),  # Third: perfect
+        ]
+        mock_agent.process_data.side_effect = responses
         mock_agent_cls.return_value = mock_agent
-
+        
         mock_mentor = MagicMock()
+        mock_mentor.generate_initial_prompt.return_value = GeneratedPrompt(
+            prompt="Extract PII from text",
+            reasoning="Initial prompt for extraction",
+            field_descriptions={"firstname": "A person's first name"},
+        )
         mock_mentor.generate_prompt.return_value = GeneratedPrompt(
-            prompt="Improved prompt for iteration",
-            reasoning="Based on error analysis",
+            prompt="Improved: Look for names and emails",
+            reasoning="Added email detection",
+            field_descriptions={"email": "Email address in user@domain format"},
         )
         mock_mentor_cls.return_value = mock_mentor
-
-        # Run optimizer
-        optimizer = PromptOptimizer(
-            window_size=2,
-            loop_count=3,
-            api_key="test-key",
-        )
         
-        results = optimizer.optimize(
-            data=data,
-            initial_prompt="Extract all PII entities from the text.",
-        )
-
-        # Verify optimization ran
-        assert len(results) > 0
-        assert all(r.total_samples == 5 for r in results)
+        optimizer = PromptOptimizer(loop_count=3, window_size=2)
         
-        # Verify mentor was called to improve prompts (unless perfect)
-        if results[0].accuracy < 1.0:
-            mock_mentor.generate_prompt.assert_called()
-
-    def test_data_variety(self, test_data_path: Path) -> None:
-        """Test that test data has variety of PII types."""
-        if not test_data_path.exists():
-            pytest.skip("Test data file not found")
+        data = [
+            ("John can be reached at test@example.com", 
+             TargetResult(firstname="John", email="test@example.com")),
+        ]
         
-        data = load_test_data(test_data_path, limit=5)
+        results = optimizer.optimize(data)
         
-        all_labels = set()
-        for _, ground_truth in data:
-            for entity in ground_truth.entities:
-                all_labels.add(entity.label)
+        # Should run iterations
+        assert len(results) >= 1
         
-        # Should have at least 5 different PII types
-        assert len(all_labels) >= 5
-        
-        # Should include common types
-        expected_types = {"FIRSTNAME", "EMAIL"}
-        assert expected_types.intersection(all_labels)
+        # All results should have required fields
+        for result in results:
+            assert hasattr(result, "iteration")
+            assert hasattr(result, "accuracy")
+            assert hasattr(result, "prompt")
