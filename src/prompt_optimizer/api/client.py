@@ -32,7 +32,7 @@ class OpenRouterClient:
         model: The model identifier to use.
 
     Examples:
-        >>> client = OpenRouterClient(model="openai/gpt-4.1-nano")
+        >>> client = OpenRouterClient(model="openai/gpt-5-nano")
         >>> # Use client.chat() for structured responses
     """
 
@@ -43,7 +43,7 @@ class OpenRouterClient:
         Initialize the OpenRouter client.
 
         Args:
-            model: The model identifier (e.g., "openai/gpt-4.1-nano").
+            model: The model identifier (e.g., "openai/gpt-5-nano").
             api_key: OpenRouter API key. If None, loaded from settings.
 
         Raises:
@@ -81,6 +81,7 @@ class OpenRouterClient:
         response_model: Type[T],
         temperature: float = 0.7,
         max_retries: int = 3,
+        reasoning_effort: str = "low",
     ) -> T:
         """
         Send a chat completion request with structured output.
@@ -90,6 +91,8 @@ class OpenRouterClient:
             response_model: Pydantic model class for response parsing.
             temperature: Sampling temperature (0.0 to 2.0).
             max_retries: Number of retries on failure.
+            reasoning_effort: Reasoning effort level ("low", "medium", "high").
+                             Use "low" to minimize thinking tokens.
 
         Returns:
             An instance of response_model populated with the response.
@@ -98,21 +101,30 @@ class OpenRouterClient:
             Exception: If API call fails after all retries.
 
         Examples:
-            >>> from prompt_optimizer.models import PIIResponse
+            >>> from prompt_optimizer.models import TargetResult
             >>> messages = [{"role": "user", "content": "Extract PII from: John"}]
-            >>> response = client.chat(messages, PIIResponse)
-            >>> isinstance(response, PIIResponse)
+            >>> response = client.chat(messages, TargetResult)
+            >>> isinstance(response, TargetResult)
             True
         """
         logger.debug(f"Sending chat request to {self.model}")
         
         try:
+            # Build extra parameters for OpenRouter/OpenAI
+            extra_body = {}
+            
+            # Add reasoning_effort for models that support it (like gpt-5)
+            if reasoning_effort and "gpt-5" in self.model:
+                extra_body["reasoning_effort"] = reasoning_effort
+                logger.debug(f"Using reasoning_effort: {reasoning_effort}")
+            
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
                 response_model=response_model,
                 temperature=temperature,
                 max_retries=max_retries,
+                extra_body=extra_body if extra_body else None,
             )
             logger.debug("Received structured response from API")
             return response
@@ -124,6 +136,7 @@ class OpenRouterClient:
         self,
         messages: list[dict[str, str]],
         temperature: float = 0.7,
+        reasoning_effort: str = "low",
     ) -> str:
         """
         Send a chat completion request and return raw text response.
@@ -131,6 +144,7 @@ class OpenRouterClient:
         Args:
             messages: List of message dicts with 'role' and 'content'.
             temperature: Sampling temperature (0.0 to 2.0).
+            reasoning_effort: Reasoning effort level ("low", "medium", "high").
 
         Returns:
             The raw text content from the model response.
@@ -153,10 +167,16 @@ class OpenRouterClient:
             },
         )
         
+        # Build extra parameters
+        extra_body = {}
+        if reasoning_effort and "gpt-5" in self.model:
+            extra_body["reasoning_effort"] = reasoning_effort
+        
         response = base_client.chat.completions.create(
             model=self.model,
             messages=messages,
             temperature=temperature,
+            extra_body=extra_body if extra_body else None,
         )
         
         content = response.choices[0].message.content or ""

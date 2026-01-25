@@ -6,6 +6,9 @@ generate improved prompts for the agent model. It also updates
 field descriptions in the schema to improve extraction accuracy.
 """
 
+from datetime import datetime
+from pathlib import Path
+
 from prompt_optimizer.api.client import OpenRouterClient
 from prompt_optimizer.config import get_settings
 from prompt_optimizer.models import (
@@ -16,6 +19,9 @@ from prompt_optimizer.models import (
 from prompt_optimizer.utils.logging import get_logger
 
 logger = get_logger(__name__)
+
+# Default log file path for mentor prompts
+MENTOR_LOG_FILE = Path("mentor_prompts.txt")
 
 
 class MentorModel:
@@ -28,6 +34,7 @@ class MentorModel:
 
     Attributes:
         client: The OpenRouter client instance.
+        log_file: Path to the file for logging mentor prompts.
 
     Examples:
         >>> mentor = MentorModel()
@@ -40,19 +47,52 @@ class MentorModel:
         True
     """
 
-    def __init__(self, model: str | None = None, api_key: str | None = None) -> None:
+    def __init__(
+        self,
+        model: str | None = None,
+        api_key: str | None = None,
+        log_file: str | Path | None = None,
+    ) -> None:
         """
         Initialize the mentor model.
 
         Args:
             model: Model identifier. If None, uses settings.mentor_model.
             api_key: OpenRouter API key. If None, loaded from settings.
+            log_file: Path to log file for mentor prompts. Defaults to mentor_prompts.txt
         """
         settings = get_settings()
         model_name = model or settings.mentor_model
         
         self.client = OpenRouterClient(model=model_name, api_key=api_key)
+        self.log_file = Path(log_file) if log_file else MENTOR_LOG_FILE
+        
         logger.info(f"Initialized MentorModel with model: {model_name}")
+        logger.info(f"Mentor prompts will be logged to: {self.log_file}")
+
+    def _log_mentor_prompt(self, prompt_type: str, messages: list[dict[str, str]]) -> None:
+        """
+        Log mentor prompt messages to a text file.
+
+        Args:
+            prompt_type: Type of prompt (e.g., "initial", "improved").
+            messages: The messages being sent to the mentor.
+        """
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        with open(self.log_file, "a", encoding="utf-8") as f:
+            f.write(f"\n{'='*80}\n")
+            f.write(f"MENTOR PROMPT - {prompt_type.upper()}\n")
+            f.write(f"Timestamp: {timestamp}\n")
+            f.write(f"{'='*80}\n\n")
+            
+            for msg in messages:
+                role = msg.get("role", "unknown").upper()
+                content = msg.get("content", "")
+                f.write(f"[{role}]\n")
+                f.write(f"{content}\n\n")
+            
+            f.write(f"{'='*80}\n")
 
     def generate_initial_prompt(
         self,
@@ -132,12 +172,16 @@ Explain your reasoning for the prompt design."""
             {"role": "user", "content": user_message},
         ]
         
+        # Log to file
+        self._log_mentor_prompt("initial", messages)
+        
         logger.info(f"User message to mentor:\n{user_message[:500]}...")
         
         response = self.client.chat(
             messages=messages,
             response_model=GeneratedPrompt,
             temperature=0.7,
+            reasoning_effort="low",  # Minimize thinking tokens
         )
         
         logger.info(f"Generated initial prompt: {response.prompt[:100]}...")
@@ -238,12 +282,16 @@ Be specific about what changes you're making and why."""
             {"role": "user", "content": user_message},
         ]
         
+        # Log to file
+        self._log_mentor_prompt("improved", messages)
+        
         logger.info(f"User message to mentor:\n{user_message[:500]}...")
         
         response = self.client.chat(
             messages=messages,
             response_model=GeneratedPrompt,
             temperature=0.7,
+            reasoning_effort="low",  # Minimize thinking tokens
         )
         
         logger.info(f"Generated improved prompt: {response.prompt[:100]}...")
