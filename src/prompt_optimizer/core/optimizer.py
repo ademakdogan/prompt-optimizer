@@ -105,6 +105,9 @@ class PromptOptimizer:
         """
         logger.info(f"Starting optimization with {len(data)} samples")
         
+        # Clear log files at the start of each optimization run
+        self.mentor.clear_log_files()
+        
         # Get initial prompt if not provided
         current_prompt = initial_prompt
         if current_prompt is None:
@@ -359,3 +362,10 @@ Accuracy progression:
             logger.info(f"\nFinal field descriptions:")
             for field, desc in best_result.field_descriptions.items():
                 logger.info(f"  {field}: {desc}")
+        
+        # Save the best prompt to final_prompt.txt
+        self.mentor.save_final_prompt(
+            prompt=best_result.prompt,
+            accuracy=best_result.accuracy * 100,
+            iteration=best_result.iteration,
+        )

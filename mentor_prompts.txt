@@ -330,3 +330,587 @@ The agent's predictions are shown above. Improve the prompt to help the agent
 produce better extractions. Be specific about what changes you're making and why.
 
 ================================================================================
+
+================================================================================
+MENTOR PROMPT - IMPROVED
+Timestamp: 2026-01-14 01:15:39
+================================================================================
+
+[SYSTEM]
+Evaluate the provided source_text. It contains AI model predictions based on specific prompts. Your objective is to analyze this context and generate new, optimized prompts, specifically aiming to minimize errors.
+
+Your task is to improve the current prompt based on:
+1. The agent's incorrect predictions shown in the history
+2. Patterns in what the agent is missing or misidentifying
+3. Accuracy trends across iterations
+
+Generate an improved prompt that addresses these issues.
+
+IMPORTANT: You must also update the field descriptions based on the errors.
+If a field is frequently missed or has wrong values, improve its description
+to make it clearer what the field looks for.
+
+[USER]
+Analyze the agent's predictions and improve the prompt:
+
+CURRENT PROMPT:
+Extract the following information from the data:
+
+- firstname: The first name of the person.
+- lastname: The last name of the person.
+- prefix: Honorifics or titles like Mr., Mrs., Dr.
+- age: Age of the person.
+- eyecolor: Eye color description.
+- jobtitle: Job title or professional role.
+- email: Email address found in the text.
+- phonenumber: Phone number contact.
+- street: Street address or physical location.
+- county: County or region name.
+- accountnumber: Bank or service account number.
+- amount: Monetary amount including currency symbol if present.
+- currency: Currency code like USD, EUR.
+- maskednumber: Partial or masked card/account numbers (e.g., last 4 digits).
+- pin: Personal Identification Number or security code.
+
+Return the extracted information as a JSON object. Only include fields that are found in the text. Omit fields that are not present.
+
+ITERATION HISTORY (showing agent predictions vs ground truth):
+
+--- History 1 ---
+<prompt>
+Extract the following information from the data:
+
+- firstname: The first name of the person.
+- lastname: The last name of the person.
+- prefix: Honorifics or titles like Mr., Mrs., Dr.
+- age: Age of the person.
+- eyecolor: Eye color description.
+- jobtitle: Job title or professional role.
+- email: Email address found in the text.
+- phonenumber: Phone number contact.
+- street: Street address or physical location.
+- county: County or region name.
+- accountnumber: Bank or service account number.
+- amount: Monetary amount including currency symbol if present.
+- currency: Currency code like USD, EUR.
+- maskednumber: Partial or masked card/account numbers (e.g., last 4 digits).
+- pin: Personal Identification Number or security code.
+
+Return the extracted information as a JSON object. Only include fields that are found in the text. Omit fields that are not present.
+</prompt>
+prompt_accuracy: 41.2%
+
+Failed predictions:
+
+[
+  "source_text": "The wellness portal is accessible at [-71.6702,-107.6572]. With numerous wellness tracks suitable for everyone in the family, enrol now! Contact us at Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:1...",
+  "ground_truth": {"nearbygpscoordinate": "[-71.6702,-107.6572]", "useragent": "Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:12.5) Gecko/20100101 Firefox/12.5.9"},
+  "predict": {}
+]
+
+[
+  "source_text": "Carleton, the new interactive educational tools are set to arrive at [-38.9302,113.5422]. Your password for accessing online content: yZqd7gHyZq91.",
+  "ground_truth": {"firstname": "Carleton", "nearbygpscoordinate": "[-38.9302,113.5422]", "password": "yZqd7gHyZq91"},
+  "predict": {}
+]
+
+[
+  "source_text": "1. Customer query received at 10:18 PM from Human Group Coordinator of Cleveland based firm. The customer's email is Emilie_Beatty53@hotmail.com. Use our account number 63652332 for all financial exch...",
+  "ground_truth": {"time": "10:18 PM", "jobtitle": "Human Group Coordinator", "county": "Cleveland", "email": "Emilie_Beatty53@hotmail.com", "accountnumber": "63652332", "pin": "8824", "eyecolor": "Eye color: Brown"},
+  "predict": {"email": "Emilie_Beatty53@hotmail.com", "accountnumber": "63652332", "pin": "8824", "eyecolor": "Brown"}
+]
+
+[
+  "source_text": "Dear Mr. Vandervort, congratulations on turning 68! Your unique ID at our wellness center is 0Zr2bcG1X9Ub. Visit us at 609 Gorczany Pass for more personalized programs.",
+  "ground_truth": {"prefix": "Mr.", "lastname": "Vandervort", "age": "68", "username": "0Zr2bcG1X9Ub", "street": "609 Gorczany Pass"},
+  "predict": {"prefix": "Mr.", "lastname": "Vandervort", "age": 68, "street": "609 Gorczany Pass"}
+]
+
+[
+  "source_text": "Please reach out to Janessa at janessa.smith@company.org or call 555-0123 for the latest updates on your order #ORD-7842. Payment of $1,250.00 USD was processed using card ending in 4532.",
+  "ground_truth": {"firstname": "Janessa", "email": "janessa.smith@company.org", "phonenumber": "555-0123", "amount": "$1,250.00", "currency": "USD", "maskednumber": "4532"},
+  "predict": {"firstname": "Janessa", "lastname": "Smith", "email": "janessa.smith@company.org", "phonenumber": "555-0123", "amount": "$1,250.00 USD", "currency": "USD", "maskednumber": "4532"}
+]
+
+
+CURRENT FIELD DESCRIPTIONS (update these based on errors):
+- firstname: The first name of the person.
+- lastname: The last name of the person.
+- prefix: Honorifics or titles like Mr., Mrs., Dr.
+- age: Age of the person.
+- eyecolor: Eye color description.
+- jobtitle: Job title or professional role.
+- email: Email address found in the text.
+- phonenumber: Phone number contact.
+- street: Street address or physical location.
+- county: County or region name.
+- accountnumber: Bank or service account number.
+- amount: Monetary amount including currency symbol if present.
+- currency: Currency code like USD, EUR.
+- maskednumber: Partial or masked card/account numbers (e.g., last 4 digits).
+- pin: Personal Identification Number or security code.
+
+
+The agent's predictions are shown above. Improve the prompt to help the agent
+produce better extractions. Be specific about what changes you're making and why.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - IMPROVED
+Timestamp: 2026-01-14 01:16:23
+================================================================================
+
+[SYSTEM]
+Evaluate the provided source_text. It contains AI model predictions based on specific prompts. Your objective is to analyze this context and generate new, optimized prompts, specifically aiming to minimize errors.
+
+Your task is to improve the current prompt based on:
+1. The agent's incorrect predictions shown in the history
+2. Patterns in what the agent is missing or misidentifying
+3. Accuracy trends across iterations
+
+Generate an improved prompt that addresses these issues.
+
+IMPORTANT: You must also update the field descriptions based on the errors.
+If a field is frequently missed or has wrong values, improve its description
+to make it clearer what the field looks for.
+
+[USER]
+Analyze the agent's predictions and improve the prompt:
+
+CURRENT PROMPT:
+You are an information extraction assistant. From each input text, extract only the fields listed below and return them as a JSON object. If a field does not appear in the text, omit it. Do not invent values.
+
+Fields to extract and how to identify them:
+- firstname: The person's first name. Look for a token that is a plausible given name appearing in proximity to other personal fields. Do not include last names.
+- lastname: The person's last name. Look for a token that is a plausible surname. Do not include given names.
+- prefix: Honorifics or titles such as Mr., Mrs., Ms., Dr., Prof. If multiple exist, prefer the formal prefix nearest to the name.
+- age: Age as a numeric value. If an explicit age is described (e.g., "turned 68"), extract the number only (e.g., 68).
+- eyecolor: Eye color name (e.g., Brown, Blue, Hazel). Use a single, capitalized color term.
+- jobtitle: Job title or professional role. Prefer phrases like "the [title]" or capitalization that indicates a title (e.g., Manager, Coordinator).
+- email: An email address in standard format (local-part@domain). Do not include partial or obfuscated emails unless they appear in full.
+- phonenumber: Phone number in a recognizable format (digits with common separators). Do not infer from non-phone strings.
+- street: Street address or location line. Include street number and street name when present.
+- county: County or region name, if provided.
+- accountnumber: Bank or service account number. Extract the exact sequence of digits (and optional separators) that represents the account.
+- amount: Monetary amount. Include the currency symbol (e.g., $) if present.
+- currency: Currency code (e.g., USD, EUR) when explicitly stated; otherwise omit.
+- maskednumber: Partial or masked card/account numbers. Return exactly as shown (e.g., last 4 digits or masked with asterisks).
+- pin: Personal Identification Number or security code. Typically 4–6 digits; extract as-is if clearly presented as a PIN.
+
+Return the extracted information as a JSON object. If a field is not present in the text, omit that field. Do not add fields.
+
+ITERATION HISTORY (showing agent predictions vs ground truth):
+
+--- History 1 ---
+<prompt>
+Extract the following information from the data:
+
+- firstname: The first name of the person.
+- lastname: The last name of the person.
+- prefix: Honorifics or titles like Mr., Mrs., Dr.
+- age: Age of the person.
+- eyecolor: Eye color description.
+- jobtitle: Job title or professional role.
+- email: Email address found in the text.
+- phonenumber: Phone number contact.
+- street: Street address or physical location.
+- county: County or region name.
+- accountnumber: Bank or service account number.
+- amount: Monetary amount including currency symbol if present.
+- currency: Currency code like USD, EUR.
+- maskednumber: Partial or masked card/account numbers (e.g., last 4 digits).
+- pin: Personal Identification Number or security code.
+
+Return the extracted information as a JSON object. Only include fields that are found in the text. Omit fields that are not present.
+</prompt>
+prompt_accuracy: 41.2%
+
+Failed predictions:
+
+[
+  "source_text": "The wellness portal is accessible at [-71.6702,-107.6572]. With numerous wellness tracks suitable for everyone in the family, enrol now! Contact us at Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:1...",
+  "ground_truth": {"nearbygpscoordinate": "[-71.6702,-107.6572]", "useragent": "Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:12.5) Gecko/20100101 Firefox/12.5.9"},
+  "predict": {}
+]
+
+[
+  "source_text": "Carleton, the new interactive educational tools are set to arrive at [-38.9302,113.5422]. Your password for accessing online content: yZqd7gHyZq91.",
+  "ground_truth": {"firstname": "Carleton", "nearbygpscoordinate": "[-38.9302,113.5422]", "password": "yZqd7gHyZq91"},
+  "predict": {}
+]
+
+[
+  "source_text": "1. Customer query received at 10:18 PM from Human Group Coordinator of Cleveland based firm. The customer's email is Emilie_Beatty53@hotmail.com. Use our account number 63652332 for all financial exch...",
+  "ground_truth": {"time": "10:18 PM", "jobtitle": "Human Group Coordinator", "county": "Cleveland", "email": "Emilie_Beatty53@hotmail.com", "accountnumber": "63652332", "pin": "8824", "eyecolor": "Eye color: Brown"},
+  "predict": {"email": "Emilie_Beatty53@hotmail.com", "accountnumber": "63652332", "pin": "8824", "eyecolor": "Brown"}
+]
+
+[
+  "source_text": "Dear Mr. Vandervort, congratulations on turning 68! Your unique ID at our wellness center is 0Zr2bcG1X9Ub. Visit us at 609 Gorczany Pass for more personalized programs.",
+  "ground_truth": {"prefix": "Mr.", "lastname": "Vandervort", "age": "68", "username": "0Zr2bcG1X9Ub", "street": "609 Gorczany Pass"},
+  "predict": {"prefix": "Mr.", "lastname": "Vandervort", "age": 68, "street": "609 Gorczany Pass"}
+]
+
+[
+  "source_text": "Please reach out to Janessa at janessa.smith@company.org or call 555-0123 for the latest updates on your order #ORD-7842. Payment of $1,250.00 USD was processed using card ending in 4532.",
+  "ground_truth": {"firstname": "Janessa", "email": "janessa.smith@company.org", "phonenumber": "555-0123", "amount": "$1,250.00", "currency": "USD", "maskednumber": "4532"},
+  "predict": {"firstname": "Janessa", "lastname": "Smith", "email": "janessa.smith@company.org", "phonenumber": "555-0123", "amount": "$1,250.00 USD", "currency": "USD", "maskednumber": "4532"}
+]
+
+--- History 2 ---
+<prompt>
+You are an information extraction assistant. From each input text, extract only the fields listed below and return them as a JSON object. If a field does not appear in the text, omit it. Do not invent values.
+
+Fields to extract and how to identify them:
+- firstname: The person's first name. Look for a token that is a plausible given name appearing in proximity to other personal fields. Do not include last names.
+- lastname: The person's last name. Look for a token that is a plausible surname. Do not include given names.
+- prefix: Honorifics or titles such as Mr., Mrs., Ms., Dr., Prof. If multiple exist, prefer the formal prefix nearest to the name.
+- age: Age as a numeric value. If an explicit age is described (e.g., "turned 68"), extract the number only (e.g., 68).
+- eyecolor: Eye color name (e.g., Brown, Blue, Hazel). Use a single, capitalized color term.
+- jobtitle: Job title or professional role. Prefer phrases like "the [title]" or capitalization that indicates a title (e.g., Manager, Coordinator).
+- email: An email address in standard format (local-part@domain). Do not include partial or obfuscated emails unless they appear in full.
+- phonenumber: Phone number in a recognizable format (digits with common separators). Do not infer from non-phone strings.
+- street: Street address or location line. Include street number and street name when present.
+- county: County or region name, if provided.
+- accountnumber: Bank or service account number. Extract the exact sequence of digits (and optional separators) that represents the account.
+- amount: Monetary amount. Include the currency symbol (e.g., $) if present.
+- currency: Currency code (e.g., USD, EUR) when explicitly stated; otherwise omit.
+- maskednumber: Partial or masked card/account numbers. Return exactly as shown (e.g., last 4 digits or masked with asterisks).
+- pin: Personal Identification Number or security code. Typically 4–6 digits; extract as-is if clearly presented as a PIN.
+
+Return the extracted information as a JSON object. If a field is not present in the text, omit that field. Do not add fields.
+</prompt>
+prompt_accuracy: 44.1%
+
+Failed predictions:
+
+[
+  "source_text": "The wellness portal is accessible at [-71.6702,-107.6572]. With numerous wellness tracks suitable for everyone in the family, enrol now! Contact us at Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:1...",
+  "ground_truth": {"nearbygpscoordinate": "[-71.6702,-107.6572]", "useragent": "Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:12.5) Gecko/20100101 Firefox/12.5.9"},
+  "predict": {}
+]
+
+[
+  "source_text": "Carleton, the new interactive educational tools are set to arrive at [-38.9302,113.5422]. Your password for accessing online content: yZqd7gHyZq91.",
+  "ground_truth": {"firstname": "Carleton", "nearbygpscoordinate": "[-38.9302,113.5422]", "password": "yZqd7gHyZq91"},
+  "predict": {"lastname": "Carleton"}
+]
+
+[
+  "source_text": "1. Customer query received at 10:18 PM from Human Group Coordinator of Cleveland based firm. The customer's email is Emilie_Beatty53@hotmail.com. Use our account number 63652332 for all financial exch...",
+  "ground_truth": {"time": "10:18 PM", "jobtitle": "Human Group Coordinator", "county": "Cleveland", "email": "Emilie_Beatty53@hotmail.com", "accountnumber": "63652332", "pin": "8824", "eyecolor": "Eye color: Brown"},
+  "predict": {"firstname": "Emilie", "lastname": "Beatty", "eyecolor": "Brown", "jobtitle": "Human Group Coordinator", "email": "Emilie_Beatty53@hotmail.com", "accountnumber": "63652332", "pin": "8824"}
+]
+
+[
+  "source_text": "Dear Mr. Vandervort, congratulations on turning 68! Your unique ID at our wellness center is 0Zr2bcG1X9Ub. Visit us at 609 Gorczany Pass for more personalized programs.",
+  "ground_truth": {"prefix": "Mr.", "lastname": "Vandervort", "age": "68", "username": "0Zr2bcG1X9Ub", "street": "609 Gorczany Pass"},
+  "predict": {"lastname": "Vandervort", "prefix": "Mr.", "age": 68, "street": "609 Gorczany Pass"}
+]
+
+[
+  "source_text": "Please reach out to Janessa at janessa.smith@company.org or call 555-0123 for the latest updates on your order #ORD-7842. Payment of $1,250.00 USD was processed using card ending in 4532.",
+  "ground_truth": {"firstname": "Janessa", "email": "janessa.smith@company.org", "phonenumber": "555-0123", "amount": "$1,250.00", "currency": "USD", "maskednumber": "4532"},
+  "predict": {"firstname": "Janessa", "lastname": "Smith", "email": "janessa.smith@company.org", "phonenumber": "555-0123", "amount": "$1,250.00 USD", "currency": "USD", "maskednumber": "4532"}
+]
+
+
+CURRENT FIELD DESCRIPTIONS (update these based on errors):
+- firstname: First name as a plain given name only (no initials or surnames).
+- lastname: Surname or family name only.
+- prefix: Honorific such as Mr., Mrs., Ms., Dr. If multiple present, pick the closest to the name.
+- age: Numeric age. If shown as part of a phrase, extract the number only.
+- eyecolor: Eye color name (e.g., Brown, Blue, Hazel). Use a single capitalized color term.
+- jobtitle: Professional title or role (e.g., Manager, Coordinator).
+- email: Valid email address in local-part@domain format.
+- phonenumber: Phone number in common formats (digits with separators).
+- street: Complete street line including number and street name when available.
+- county: County or regional name if provided.
+- accountnumber: Exact digits with optional separators representing an account number.
+- amount: Monetary amount with currency symbol if present (e.g., $1,234.56).
+- currency: 3-letter currency code (e.g., USD, EUR) when explicitly stated.
+- maskednumber: Partial or masked number as shown (e.g., ****1234 or 1234).
+- pin: PIN or security code, typically 4–6 digits.
+
+
+The agent's predictions are shown above. Improve the prompt to help the agent
+produce better extractions. Be specific about what changes you're making and why.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - IMPROVED
+Timestamp: 2026-01-14 01:17:07
+================================================================================
+
+[SYSTEM]
+Evaluate the provided source_text. It contains AI model predictions based on specific prompts. Your objective is to analyze this context and generate new, optimized prompts, specifically aiming to minimize errors.
+
+Your task is to improve the current prompt based on:
+1. The agent's incorrect predictions shown in the history
+2. Patterns in what the agent is missing or misidentifying
+3. Accuracy trends across iterations
+
+Generate an improved prompt that addresses these issues.
+
+IMPORTANT: You must also update the field descriptions based on the errors.
+If a field is frequently missed or has wrong values, improve its description
+to make it clearer what the field looks for.
+
+[USER]
+Analyze the agent's predictions and improve the prompt:
+
+CURRENT PROMPT:
+You are an information extraction assistant. From each input text, extract only the fields listed below and return them as a JSON object. If a field does not appear in the text, omit it. Do not invent values. Do not infer fields outside the specified set. If multiple values could satisfy a field, choose the one that is most clearly stated in the text and prefer the format shown (preserve currency symbols, exact digits, and masked strings). If a field appears with an explicit label (e.g., "Eye color:", "Email:"), prefer that labeling to discover the value. Do not include any auxiliary fields or metadata.
+
+Fields to extract and how to identify them:
+- firstname: The person\'s first name. Look for a token that is a plausible given name appearing near other personal fields. Do not include last names. If the first name is embedded in a longer token (e.g., "Carleton"), include it as-is.
+- lastname: The person\'s last name. Look for a token that is a plausible surname. Do not include given names. If a token looks like a full name, split only if you can clearly identify a surname.
+- prefix: Honorifics or titles such as Mr., Mrs., Ms., Dr., Prof. If multiple exist, prefer the formal prefix nearest to the name.
+- age: Age as a numeric value. If an explicit age is described (e.g., "turned 68"), extract the number only (e.g., 68).
+- eyecolor: Eye color name (e.g., Brown, Blue, Hazel). Use a single, capitalized color term.
+- jobtitle: Job title or professional role. Prefer phrases like "the [title]" or capitalization that indicates a title (e.g., Manager, Coordinator).
+- email: An email address in standard format (local-part@domain). Do not include partial or obfuscated emails unless they appear in full.
+- phonenumber: Phone number in a recognizable format (digits with common separators). Do not infer from non-phone strings.
+- street: Street address or location line. Include street number and street name when present.
+- county: County or region name, if provided.
+- accountnumber: Bank or service account number. Extract the exact sequence of digits (and optional separators) that represents the account.
+- amount: Monetary amount. Include the currency symbol (e.g., $) if present.
+- currency: Currency code (e.g., USD, EUR) when explicitly stated; otherwise omit.
+- maskednumber: Partial or masked card/account numbers. Return exactly as shown (e.g., last 4 digits or masked with asterisks).
+- pin: Personal Identification Number or security code. Typically 4–6 digits; extract as-is if clearly presented as a PIN.
+
+Return the extracted information as a JSON object. If a field is not present in the text, omit that field. Do not add fields.
+
+Notes and clarifications to reduce errors:
+- Do not attempt to extract nearbygpscoordinate, useragent, password,_time, or other metadata unless they are part of the defined fields.
+- When a piece of text contains multiple potential matches for a field (e.g., several emails), choose the one that is clearly labeled or the only fully-formed address present.
+- Do not combine fields (e.g., merge first and last name into one string). Keep values as they appear in the source when possible.
+- If a value is provided with punctuation, preserve the value exactly as shown (e.g.,  \"$1,250.00\", \"4532\").
+- For eyecolor, accept only common color words with initial capital letter; do not derive from descriptions (e.g., \"eye color: Brown\" in text should yield eyecolor: Brown).
+
+Iteration hint: If predictions consistently miss a field, re-scan for that field with stricter cues (e.g., look for typical field labels like Email:, Phone:, Amount:, Masked, PIN).
+
+ITERATION HISTORY (showing agent predictions vs ground truth):
+
+--- History 2 ---
+<prompt>
+You are an information extraction assistant. From each input text, extract only the fields listed below and return them as a JSON object. If a field does not appear in the text, omit it. Do not invent values.
+
+Fields to extract and how to identify them:
+- firstname: The person's first name. Look for a token that is a plausible given name appearing in proximity to other personal fields. Do not include last names.
+- lastname: The person's last name. Look for a token that is a plausible surname. Do not include given names.
+- prefix: Honorifics or titles such as Mr., Mrs., Ms., Dr., Prof. If multiple exist, prefer the formal prefix nearest to the name.
+- age: Age as a numeric value. If an explicit age is described (e.g., "turned 68"), extract the number only (e.g., 68).
+- eyecolor: Eye color name (e.g., Brown, Blue, Hazel). Use a single, capitalized color term.
+- jobtitle: Job title or professional role. Prefer phrases like "the [title]" or capitalization that indicates a title (e.g., Manager, Coordinator).
+- email: An email address in standard format (local-part@domain). Do not include partial or obfuscated emails unless they appear in full.
+- phonenumber: Phone number in a recognizable format (digits with common separators). Do not infer from non-phone strings.
+- street: Street address or location line. Include street number and street name when present.
+- county: County or region name, if provided.
+- accountnumber: Bank or service account number. Extract the exact sequence of digits (and optional separators) that represents the account.
+- amount: Monetary amount. Include the currency symbol (e.g., $) if present.
+- currency: Currency code (e.g., USD, EUR) when explicitly stated; otherwise omit.
+- maskednumber: Partial or masked card/account numbers. Return exactly as shown (e.g., last 4 digits or masked with asterisks).
+- pin: Personal Identification Number or security code. Typically 4–6 digits; extract as-is if clearly presented as a PIN.
+
+Return the extracted information as a JSON object. If a field is not present in the text, omit that field. Do not add fields.
+</prompt>
+prompt_accuracy: 44.1%
+
+Failed predictions:
+
+[
+  "source_text": "The wellness portal is accessible at [-71.6702,-107.6572]. With numerous wellness tracks suitable for everyone in the family, enrol now! Contact us at Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:1...",
+  "ground_truth": {"nearbygpscoordinate": "[-71.6702,-107.6572]", "useragent": "Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:12.5) Gecko/20100101 Firefox/12.5.9"},
+  "predict": {}
+]
+
+[
+  "source_text": "Carleton, the new interactive educational tools are set to arrive at [-38.9302,113.5422]. Your password for accessing online content: yZqd7gHyZq91.",
+  "ground_truth": {"firstname": "Carleton", "nearbygpscoordinate": "[-38.9302,113.5422]", "password": "yZqd7gHyZq91"},
+  "predict": {"lastname": "Carleton"}
+]
+
+[
+  "source_text": "1. Customer query received at 10:18 PM from Human Group Coordinator of Cleveland based firm. The customer's email is Emilie_Beatty53@hotmail.com. Use our account number 63652332 for all financial exch...",
+  "ground_truth": {"time": "10:18 PM", "jobtitle": "Human Group Coordinator", "county": "Cleveland", "email": "Emilie_Beatty53@hotmail.com", "accountnumber": "63652332", "pin": "8824", "eyecolor": "Eye color: Brown"},
+  "predict": {"firstname": "Emilie", "lastname": "Beatty", "eyecolor": "Brown", "jobtitle": "Human Group Coordinator", "email": "Emilie_Beatty53@hotmail.com", "accountnumber": "63652332", "pin": "8824"}
+]
+
+[
+  "source_text": "Dear Mr. Vandervort, congratulations on turning 68! Your unique ID at our wellness center is 0Zr2bcG1X9Ub. Visit us at 609 Gorczany Pass for more personalized programs.",
+  "ground_truth": {"prefix": "Mr.", "lastname": "Vandervort", "age": "68", "username": "0Zr2bcG1X9Ub", "street": "609 Gorczany Pass"},
+  "predict": {"lastname": "Vandervort", "prefix": "Mr.", "age": 68, "street": "609 Gorczany Pass"}
+]
+
+[
+  "source_text": "Please reach out to Janessa at janessa.smith@company.org or call 555-0123 for the latest updates on your order #ORD-7842. Payment of $1,250.00 USD was processed using card ending in 4532.",
+  "ground_truth": {"firstname": "Janessa", "email": "janessa.smith@company.org", "phonenumber": "555-0123", "amount": "$1,250.00", "currency": "USD", "maskednumber": "4532"},
+  "predict": {"firstname": "Janessa", "lastname": "Smith", "email": "janessa.smith@company.org", "phonenumber": "555-0123", "amount": "$1,250.00 USD", "currency": "USD", "maskednumber": "4532"}
+]
+
+--- History 3 ---
+<prompt>
+You are an information extraction assistant. From each input text, extract only the fields listed below and return them as a JSON object. If a field does not appear in the text, omit it. Do not invent values. Do not infer fields outside the specified set. If multiple values could satisfy a field, choose the one that is most clearly stated in the text and prefer the format shown (preserve currency symbols, exact digits, and masked strings). If a field appears with an explicit label (e.g., "Eye color:", "Email:"), prefer that labeling to discover the value. Do not include any auxiliary fields or metadata.
+
+Fields to extract and how to identify them:
+- firstname: The person\'s first name. Look for a token that is a plausible given name appearing near other personal fields. Do not include last names. If the first name is embedded in a longer token (e.g., "Carleton"), include it as-is.
+- lastname: The person\'s last name. Look for a token that is a plausible surname. Do not include given names. If a token looks like a full name, split only if you can clearly identify a surname.
+- prefix: Honorifics or titles such as Mr., Mrs., Ms., Dr., Prof. If multiple exist, prefer the formal prefix nearest to the name.
+- age: Age as a numeric value. If an explicit age is described (e.g., "turned 68"), extract the number only (e.g., 68).
+- eyecolor: Eye color name (e.g., Brown, Blue, Hazel). Use a single, capitalized color term.
+- jobtitle: Job title or professional role. Prefer phrases like "the [title]" or capitalization that indicates a title (e.g., Manager, Coordinator).
+- email: An email address in standard format (local-part@domain). Do not include partial or obfuscated emails unless they appear in full.
+- phonenumber: Phone number in a recognizable format (digits with common separators). Do not infer from non-phone strings.
+- street: Street address or location line. Include street number and street name when present.
+- county: County or region name, if provided.
+- accountnumber: Bank or service account number. Extract the exact sequence of digits (and optional separators) that represents the account.
+- amount: Monetary amount. Include the currency symbol (e.g., $) if present.
+- currency: Currency code (e.g., USD, EUR) when explicitly stated; otherwise omit.
+- maskednumber: Partial or masked card/account numbers. Return exactly as shown (e.g., last 4 digits or masked with asterisks).
+- pin: Personal Identification Number or security code. Typically 4–6 digits; extract as-is if clearly presented as a PIN.
+
+Return the extracted information as a JSON object. If a field is not present in the text, omit that field. Do not add fields.
+
+Notes and clarifications to reduce errors:
+- Do not attempt to extract nearbygpscoordinate, useragent, password,_time, or other metadata unless they are part of the defined fields.
+- When a piece of text contains multiple potential matches for a field (e.g., several emails), choose the one that is clearly labeled or the only fully-formed address present.
+- Do not combine fields (e.g., merge first and last name into one string). Keep values as they appear in the source when possible.
+- If a value is provided with punctuation, preserve the value exactly as shown (e.g.,  \"$1,250.00\", \"4532\").
+- For eyecolor, accept only common color words with initial capital letter; do not derive from descriptions (e.g., \"eye color: Brown\" in text should yield eyecolor: Brown).
+
+Iteration hint: If predictions consistently miss a field, re-scan for that field with stricter cues (e.g., look for typical field labels like Email:, Phone:, Amount:, Masked, PIN).
+</prompt>
+prompt_accuracy: 51.2%
+
+Failed predictions:
+
+[
+  "source_text": "The wellness portal is accessible at [-71.6702,-107.6572]. With numerous wellness tracks suitable for everyone in the family, enrol now! Contact us at Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:1...",
+  "ground_truth": {"nearbygpscoordinate": "[-71.6702,-107.6572]", "useragent": "Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:12.5) Gecko/20100101 Firefox/12.5.9"},
+  "predict": {}
+]
+
+[
+  "source_text": "Carleton, the new interactive educational tools are set to arrive at [-38.9302,113.5422]. Your password for accessing online content: yZqd7gHyZq91.",
+  "ground_truth": {"firstname": "Carleton", "nearbygpscoordinate": "[-38.9302,113.5422]", "password": "yZqd7gHyZq91"},
+  "predict": {"firstname": "Carleton"}
+]
+
+[
+  "source_text": "1. Customer query received at 10:18 PM from Human Group Coordinator of Cleveland based firm. The customer's email is Emilie_Beatty53@hotmail.com. Use our account number 63652332 for all financial exch...",
+  "ground_truth": {"time": "10:18 PM", "jobtitle": "Human Group Coordinator", "county": "Cleveland", "email": "Emilie_Beatty53@hotmail.com", "accountnumber": "63652332", "pin": "8824", "eyecolor": "Eye color: Brown"},
+  "predict": {"email": "Emilie_Beatty53@hotmail.com", "accountnumber": "63652332", "pin": "8824", "eyecolor": "Brown", "jobtitle": "Group Coordinator"}
+]
+
+[
+  "source_text": "Dear Mr. Vandervort, congratulations on turning 68! Your unique ID at our wellness center is 0Zr2bcG1X9Ub. Visit us at 609 Gorczany Pass for more personalized programs.",
+  "ground_truth": {"prefix": "Mr.", "lastname": "Vandervort", "age": "68", "username": "0Zr2bcG1X9Ub", "street": "609 Gorczany Pass"},
+  "predict": {"prefix": "Mr.", "lastname": "Vandervort", "age": 68, "street": "609 Gorczany Pass"}
+]
+
+[
+  "source_text": "Please reach out to Janessa at janessa.smith@company.org or call 555-0123 for the latest updates on your order #ORD-7842. Payment of $1,250.00 USD was processed using card ending in 4532.",
+  "ground_truth": {"firstname": "Janessa", "email": "janessa.smith@company.org", "phonenumber": "555-0123", "amount": "$1,250.00", "currency": "USD", "maskednumber": "4532"},
+  "predict": {"firstname": "Janessa", "lastname": "Smith", "email": "janessa.smith@company.org", "phonenumber": "555-0123", "amount": "$1,250.00", "currency": "USD", "maskednumber": "4532"}
+]
+
+
+CURRENT FIELD DESCRIPTIONS (update these based on errors):
+- firstname: First given name. Do not include any initials or surnames. If a name is part of a longer token, capture it entirely (e.g., Carleton).
+- lastname: Surname or family name only. Do not include given names.
+- prefix: Honorifics/titles (e.g., Mr., Mrs., Ms., Dr., Prof). If several are present, choose the one closest to the name.
+- age: Numeric age. If mentioned in a phrase (e.g., turned 68), extract the number only (68).
+- eyecolor: Eye color keyword. Use a single capitalized color (e.g., Brown, Blue, Hazel).
+- jobtitle: Professional role or title. Look for title cues (the, Manager, Coordinator) and capitalization that indicates a title.
+- email: Valid email address in local-part@domain format. Do not include obfuscated or partial emails unless complete.
+- phonenumber: Phone number in standard formats with digits and separators. Do not infer from non-number text.
+- street: Complete street line including street number and street name when available.
+- county: County or region name, if provided.
+- accountnumber: Exact sequence of digits with optional separators representing an account number.
+- amount: Monetary amount with currency symbol if present (e.g., $1,234.56).
+- currency: 3-letter currency code (e.g., USD, EUR) when explicitly stated; otherwise omit.
+- maskednumber: Partial or masked number exactly as shown (e.g., ****1234 or 1234).
+- pin: PIN or security code, typically 4–6 digits; extract as-is when clearly presented as a PIN.
+
+
+The agent's predictions are shown above. Improve the prompt to help the agent
+produce better extractions. Be specific about what changes you're making and why.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - INITIAL
+Timestamp: 2026-01-14 01:21:34
+================================================================================
+
+[SYSTEM]
+Below, in source_text, you are provided with sample data and the desired values to be extracted from it. Generate a professional prompt designed to extract such data with high accuracy, following the provided example.
+
+Your goal is to create a clear, detailed prompt that will guide an AI assistant 
+to accurately extract structured information from text.
+
+The prompt should:
+1. Be specific about what types of data to look for
+2. Provide clear instructions on the output format (JSON)
+3. Include guidance on edge cases
+4. Be concise but comprehensive
+
+You must also provide descriptions for each field type to help
+the AI better understand what to extract.
+
+[USER]
+Create a professional prompt for data extraction based on this example:
+
+SAMPLE INPUT TEXT:
+Test data
+
+EXPECTED OUTPUT (ground truth):
+{
+  "firstname": "John"
+}
+
+
+Generate a prompt that would produce this expected output when given the sample input.
+Also provide descriptions for each field type that appears in the expected output.
+These descriptions should help the AI understand exactly what to look for.
+
+Explain your reasoning for the prompt design.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - IMPROVED
+Timestamp: 2026-01-14 01:21:34
+================================================================================
+
+[SYSTEM]
+Evaluate the provided source_text. It contains AI model predictions based on specific prompts. Your objective is to analyze this context and generate new, optimized prompts, specifically aiming to minimize errors.
+
+Your task is to improve the current prompt based on:
+1. The agent's incorrect predictions shown in the history
+2. Patterns in what the agent is missing or misidentifying
+3. Accuracy trends across iterations
+
+Generate an improved prompt that addresses these issues.
+
+IMPORTANT: You must also update the field descriptions based on the errors.
+If a field is frequently missed or has wrong values, improve its description
+to make it clearer what the field looks for.
+
+[USER]
+Analyze the agent's predictions and improve the prompt:
+
+CURRENT PROMPT:
+Original prompt
+
+ITERATION HISTORY (showing agent predictions vs ground truth):
+No previous iterations.
+
+
+The agent's predictions are shown above. Improve the prompt to help the agent
+produce better extractions. Be specific about what changes you're making and why.
+
+================================================================================

@@ -19,6 +19,7 @@ logger = get_logger(__name__)
 
 # Default log file path for mentor prompts
 MENTOR_LOG_FILE = Path("mentor_prompts.txt")
+FINAL_PROMPT_FILE = Path("final_prompt.txt")
 
 
 class FailedPrediction:
@@ -134,6 +135,45 @@ class MentorModel:
                 f.write(f"{content}\n\n")
             
             f.write(f"{'='*80}\n")
+
+    def clear_log_files(self) -> None:
+        """
+        Clear the mentor prompts log file before starting a new optimization.
+        
+        This should be called at the start of each optimization run to ensure
+        fresh logs for the current session.
+        """
+        # Clear mentor prompts log
+        with open(self.log_file, "w", encoding="utf-8") as f:
+            f.write("")  # Clear the file
+        logger.info(f"Cleared mentor log file: {self.log_file}")
+        
+        # Clear final prompt file
+        with open(FINAL_PROMPT_FILE, "w", encoding="utf-8") as f:
+            f.write("")  # Clear the file
+        logger.info(f"Cleared final prompt file: {FINAL_PROMPT_FILE}")
+
+    def save_final_prompt(self, prompt: str, accuracy: float, iteration: int) -> None:
+        """
+        Save the best prompt to the final prompt file.
+        
+        Args:
+            prompt: The best performing prompt.
+            accuracy: The accuracy achieved by this prompt.
+            iteration: The iteration number when this prompt was used.
+        """
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        with open(FINAL_PROMPT_FILE, "w", encoding="utf-8") as f:
+            f.write(f"# Final Optimized Prompt\n")
+            f.write(f"# Best accuracy achieved: {accuracy:.1f}%\n")
+            f.write(f"# Iteration: {iteration}\n")
+            f.write(f"# Generated: {timestamp}\n")
+            f.write(f"\n")
+            f.write(prompt)
+            f.write(f"\n")
+        
+        logger.info(f"Saved final prompt to: {FINAL_PROMPT_FILE}")
 
     def generate_initial_prompt(
         self,
