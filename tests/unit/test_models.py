@@ -5,89 +5,79 @@ Unit tests for Pydantic models.
 import pytest
 
 from prompt_optimizer.models import (
-    PIIEntity,
-    PIIResponse,
+    ExtractionSchema,
     ErrorFeedback,
     OptimizationResult,
     PromptHistory,
     MentorPromptRequest,
     GeneratedPrompt,
+    generate_default_prompt,
+    get_schema_field_descriptions,
 )
 
 
-class TestPIIEntity:
-    """Tests for PIIEntity model."""
+class TestExtractionSchema:
+    """Tests for ExtractionSchema model."""
 
-    def test_create_entity(self) -> None:
-        """Test creating a PIIEntity."""
-        entity = PIIEntity(
-            value="john@email.com",
-            label="EMAIL",
-            start=10,
-            end=24,
+    def test_create_empty_schema(self) -> None:
+        """Test creating an empty ExtractionSchema."""
+        schema = ExtractionSchema()
+        
+        assert schema.firstname is None
+        assert schema.email is None
+        assert schema.amount is None
+
+    def test_create_schema_with_values(self) -> None:
+        """Test creating ExtractionSchema with values."""
+        schema = ExtractionSchema(
+            firstname="John",
+            email="john@email.com",
+            amount="$1,250.00",
+            currency="USD",
         )
         
-        assert entity.value == "john@email.com"
-        assert entity.label == "EMAIL"
-        assert entity.start == 10
-        assert entity.end == 24
+        assert schema.firstname == "John"
+        assert schema.email == "john@email.com"
+        assert schema.amount == "$1,250.00"
+        assert schema.currency == "USD"
 
-    def test_entity_serialization(self) -> None:
-        """Test entity can be serialized to dict."""
-        entity = PIIEntity(
-            value="John",
-            label="FIRSTNAME",
-            start=0,
-            end=4,
+    def test_schema_serialization(self) -> None:
+        """Test schema can be serialized to dict."""
+        schema = ExtractionSchema(
+            firstname="Jane",
+            lastname="Doe",
+            jobtitle="Engineer",
         )
         
-        data = entity.model_dump()
+        data = schema.model_dump(exclude_none=True)
         
-        assert data["value"] == "John"
-        assert data["label"] == "FIRSTNAME"
+        assert data["firstname"] == "Jane"
+        assert data["lastname"] == "Doe"
+        assert data["jobtitle"] == "Engineer"
+        assert "email" not in data  # None values excluded
 
-
-class TestPIIResponse:
-    """Tests for PIIResponse model."""
-
-    def test_create_response(self) -> None:
-        """Test creating a PIIResponse."""
-        entity = PIIEntity(
-            value="test@email.com",
-            label="EMAIL",
-            start=9,
-            end=23,
-        )
-        response = PIIResponse(
-            entities=[entity],
-            masked_text="Contact: [EMAIL]",
-        )
-        
-        assert len(response.entities) == 1
-        assert response.masked_text == "Contact: [EMAIL]"
-
-    def test_empty_response(self) -> None:
-        """Test creating empty response."""
-        response = PIIResponse()
-        
-        assert len(response.entities) == 0
-        assert response.masked_text == ""
-
-    def test_multiple_entities(self) -> None:
-        """Test response with multiple entities."""
-        entities = [
-            PIIEntity(value="John", label="FIRSTNAME", start=0, end=4),
-            PIIEntity(value="test@email.com", label="EMAIL", start=6, end=20),
-        ]
-        
-        response = PIIResponse(
-            entities=entities,
-            masked_text="[FIRSTNAME] [EMAIL]",
+    def test_all_fields(self) -> None:
+        """Test schema with all fields populated."""
+        schema = ExtractionSchema(
+            firstname="John",
+            lastname="Doe",
+            prefix="Mr.",
+            age="30",
+            eyecolor="blue",
+            jobtitle="Developer",
+            email="john@example.com",
+            phonenumber="555-0123",
+            street="123 Main St",
+            county="Example County",
+            accountnumber="1234567890",
+            amount="$500.00",
+            currency="USD",
+            maskednumber="4532",
+            pin="1234",
         )
         
-        assert len(response.entities) == 2
-        assert response.entities[0].label == "FIRSTNAME"
-        assert response.entities[1].label == "EMAIL"
+        assert schema.firstname == "John"
+        assert schema.pin == "1234"
 
 
 class TestErrorFeedback:
@@ -96,14 +86,14 @@ class TestErrorFeedback:
     def test_create_error_feedback(self) -> None:
         """Test creating an ErrorFeedback."""
         error = ErrorFeedback(
-            field_name="EMAIL",
-            prompt="Extract all PII",
+            field_name="email",
+            prompt="Extract all data",
             source_text="Contact john@email.com",
             agent_answer="No email found",
             ground_truth="john@email.com",
         )
         
-        assert error.field_name == "EMAIL"
+        assert error.field_name == "email"
         assert "Extract" in error.prompt
         assert error.agent_answer == "No email found"
 
@@ -115,7 +105,7 @@ class TestOptimizationResult:
         """Test creating an OptimizationResult."""
         result = OptimizationResult(
             iteration=1,
-            prompt="Extract PII",
+            prompt="Extract data",
             accuracy=0.85,
             total_samples=10,
             correct_samples=8.5,
@@ -129,7 +119,7 @@ class TestOptimizationResult:
     def test_result_with_errors(self) -> None:
         """Test result with error list."""
         error = ErrorFeedback(
-            field_name="EMAIL",
+            field_name="email",
             prompt="test",
             source_text="test",
             agent_answer="none",
@@ -146,7 +136,7 @@ class TestOptimizationResult:
         )
         
         assert len(result.errors) == 1
-        assert result.errors[0].field_name == "EMAIL"
+        assert result.errors[0].field_name == "email"
 
 
 class TestPromptHistory:
@@ -156,14 +146,14 @@ class TestPromptHistory:
         """Test creating a PromptHistory."""
         history = PromptHistory(
             iteration=1,
-            prompt="Extract PII entities",
+            prompt="Extract entities",
             accuracy=0.75,
-            error_summary={"EMAIL": 2, "PHONE": 1},
+            error_summary={"email": 2, "phone": 1},
         )
         
         assert history.iteration == 1
         assert history.accuracy == 0.75
-        assert history.error_summary["EMAIL"] == 2
+        assert history.error_summary["email"] == 2
 
 
 class TestMentorPromptRequest:
@@ -172,13 +162,13 @@ class TestMentorPromptRequest:
     def test_create_request(self) -> None:
         """Test creating a MentorPromptRequest."""
         request = MentorPromptRequest(
-            current_prompt="Extract PII",
+            current_prompt="Extract data",
             errors=[],
             history=[],
             schema_description="JSON with entities",
         )
         
-        assert request.current_prompt == "Extract PII"
+        assert request.current_prompt == "Extract data"
         assert len(request.errors) == 0
 
     def test_request_without_prompt(self) -> None:
@@ -198,9 +188,76 @@ class TestGeneratedPrompt:
     def test_create_generated_prompt(self) -> None:
         """Test creating a GeneratedPrompt."""
         generated = GeneratedPrompt(
-            prompt="Extract all PII entities including names and emails",
+            prompt="Extract all entities including names and emails",
             reasoning="Added more specific entity types",
         )
         
-        assert "PII" in generated.prompt
+        assert "Extract" in generated.prompt
         assert len(generated.reasoning) > 0
+
+
+class TestGenerateDefaultPrompt:
+    """Tests for generate_default_prompt function."""
+
+    def test_prompt_contains_extract_instruction(self) -> None:
+        """Test that prompt contains the extraction instruction."""
+        prompt = generate_default_prompt()
+        
+        assert "Extract the following information from the data" in prompt
+
+    def test_prompt_contains_field_names(self) -> None:
+        """Test that prompt contains all schema field names."""
+        prompt = generate_default_prompt()
+        
+        assert "firstname" in prompt
+        assert "email" in prompt
+        assert "amount" in prompt
+        assert "phonenumber" in prompt
+
+    def test_prompt_contains_descriptions(self) -> None:
+        """Test that prompt contains field descriptions."""
+        prompt = generate_default_prompt()
+        
+        assert "first name of the person" in prompt
+        assert "Email address found in the text" in prompt
+
+    def test_prompt_contains_json_instruction(self) -> None:
+        """Test that prompt includes JSON return instruction."""
+        prompt = generate_default_prompt()
+        
+        assert "JSON" in prompt
+
+
+class TestGetSchemaFieldDescriptions:
+    """Tests for get_schema_field_descriptions function."""
+
+    def test_returns_dict(self) -> None:
+        """Test that function returns a dictionary."""
+        descriptions = get_schema_field_descriptions()
+        
+        assert isinstance(descriptions, dict)
+
+    def test_contains_all_fields(self) -> None:
+        """Test that all schema fields are present."""
+        descriptions = get_schema_field_descriptions()
+        
+        assert "firstname" in descriptions
+        assert "lastname" in descriptions
+        assert "email" in descriptions
+        assert "amount" in descriptions
+        assert "pin" in descriptions
+
+    def test_descriptions_are_strings(self) -> None:
+        """Test that all descriptions are strings."""
+        descriptions = get_schema_field_descriptions()
+        
+        for key, value in descriptions.items():
+            assert isinstance(key, str)
+            assert isinstance(value, str)
+
+    def test_descriptions_are_meaningful(self) -> None:
+        """Test that descriptions contain meaningful content."""
+        descriptions = get_schema_field_descriptions()
+        
+        assert "first name" in descriptions["firstname"].lower()
+        assert "email" in descriptions["email"].lower()

@@ -189,16 +189,4 @@ class GeneratedPrompt(BaseModel):
     )
 
 
-# Legacy models kept for backward compatibility
-class PIIEntity(BaseModel):
-    """Legacy model - kept for backward compatibility."""
-    value: str = Field(..., description="The value found in text")
-    label: str = Field(..., description="The category/type")
-    start: int = Field(..., description="Starting character position")
-    end: int = Field(..., description="Ending character position")
 
-
-class PIIResponse(BaseModel):
-    """Legacy model - kept for backward compatibility."""
-    entities: list[PIIEntity] = Field(default_factory=list)
-    masked_text: str = Field(default="")

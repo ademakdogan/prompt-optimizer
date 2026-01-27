@@ -11,8 +11,7 @@ from prompt_optimizer.utils.logging import setup_logging, get_logger
 from prompt_optimizer.utils.schema import (
     export_schema,
     get_response_schema_description,
-    get_pii_entity_schema,
-    get_pii_response_schema,
+    get_extraction_schema,
 )
 
 __all__ = [
@@ -20,6 +19,6 @@ __all__ = [
     "get_logger",
     "export_schema",
     "get_response_schema_description",
-    "get_pii_entity_schema",
-    "get_pii_response_schema",
+    "get_extraction_schema",
 ]
+

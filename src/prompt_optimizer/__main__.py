@@ -25,16 +25,16 @@ def main() -> int:
 
     Examples:
         >>> # Run from command line
-        >>> # python -m prompt_optimizer --data resources/pii/english_pii_43k.jsonl
+        >>> # python -m prompt_optimizer --data resources/test_data.json
     """
     parser = argparse.ArgumentParser(
-        description="Optimize prompts for PII extraction using mentor-agent architecture"
+        description="Optimize prompts for structured data extraction using mentor-agent architecture"
     )
     
     parser.add_argument(
         "--data",
         type=str,
-        default="resources/pii/english_pii_43k.jsonl",
+        default="resources/test_data.json",
         help="Path to data file (JSONL or JSON)",
     )
     

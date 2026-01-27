@@ -169,7 +169,7 @@ class MentorModel:
         logger.info("=" * 60)
         logger.info("Generating initial prompt from sample data and ground truth")
         
-        system_message = """You are an expert prompt engineer.
+        system_message = """Below, in source_text, you are provided with sample data and the desired values to be extracted from it. Generate a professional prompt designed to extract such data with high accuracy, following the provided example.
 
 Your goal is to create a clear, detailed prompt that will guide an AI assistant 
 to accurately extract structured information from text.
@@ -262,7 +262,7 @@ Explain your reasoning for the prompt design."""
         logger.info("=" * 60)
         logger.info(f"Generating improved prompt with {len(history)} history entries")
         
-        system_message = """You are an expert prompt engineer analyzing extraction errors.
+        system_message = """Evaluate the provided source_text. It contains AI model predictions based on specific prompts. Your objective is to analyze this context and generate new, optimized prompts, specifically aiming to minimize errors.
 
 Your task is to improve the current prompt based on:
 1. The agent's incorrect predictions shown in the history

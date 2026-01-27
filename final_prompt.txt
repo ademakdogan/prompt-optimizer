@@ -1,0 +1,38 @@
+# Final Optimized Prompt
+# Best accuracy achieved: 57.4%
+# Generated: 2026-01-14
+
+Improve data extraction prompt to minimize errors and align with common patterns in ground truth. The extractor should:
+- Output a JSON object containing extracted fields.
+- Include a field only if it appears in the source text. If a field appears with multiple possible formats, extract a canonical version.
+- Be strict about field formats:
+  - firstname / lastname: simple alphabetic strings (allow hyphens/apostrophes)
+  - prefix: one of Mr., Mrs., Miss, Ms., Dr., Prof., etc. (include exact punctuation)
+  - age: integer (no words)
+  - eyecolor: color descriptor (e.g., Brown, Blue) – case-insensitive, standardize to Capitalized (Brown)
+  - jobtitle: free text, keep as-is
+  - email: valid email format
+  - phonenumber: standard international or local formats; preserve digits, allow spaces/hyphens/parentheses
+  - street: street address text
+  - county: proper county/region name
+  - accountnumber: alphanumeric as-is
+  - amount: numeric value with currency if present; separate currency field when possible
+  - currency: 3-letter currency code if detectable (USD, EUR, etc.)
+  - maskednumber: keep last digits shown (e.g., 4532) with mask context if present
+  - pin: 4-6 digit numeric string
+  - nearbygpscoordinate: coordinates in the form [lat,lon] if found
+  - useragent: full user agent string if present
+  - time: time string (e.g., 10:18 PM) if present
+  - username: alphanumeric user handle if present
+  - password: password string if present
+- Special handling:
+  - If currency is detectable from amount (e.g., $1,250.00 USD), split into amount: "$1,250.00" and currency: USD (or symbol + code as appropriate). If only currency symbol is present (e.g., $), infer USD if context indicates USD; otherwise leave currency blank.
+  - Do not invent fields beyond those listed; if a field is not present, omit it.
+- Return a single JSON object with the exact field names as listed above. Do not include extraneous text.
+- Avoid false positives by requiring corroborating patterns (e.g., email must have '@', phone number digits). If ambiguous, omit the field.
+
+Given the following source_text, extract the fields accordingly and return the JSON object:
+
+SOURCE_TEXT:
+
+"{source_text}"

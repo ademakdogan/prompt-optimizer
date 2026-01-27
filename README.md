@@ -5,7 +5,7 @@ A Python tool for optimizing prompts using a mentor-agent architecture via OpenR
 ## Overview
 
 This project implements an automated prompt optimization loop where:
-1. An **Agent** model processes data with a given prompt, producing structured PII extraction results
+1. An **Agent** model processes data with a given prompt, producing structured extraction results
 2. Responses are evaluated against ground truth using configurable accuracy metrics
 3. Errors are collected and analyzed by field type
 4. A **Mentor** model analyzes errors and generates improved prompts
@@ -16,7 +16,7 @@ This project implements an automated prompt optimization loop where:
 - **Mentor-Agent Architecture**: Uses two models for optimization
 - **Structured Responses**: Uses instructor library for Pydantic-validated responses
 - **Window Size**: Configurable history tracking for mentor context
-- **PII Extraction**: Specialized for extracting Personally Identifiable Information
+- **Flexible Extraction**: Supports various data types (personal info, invoices, resumes, etc.)
 - **Comprehensive Logging**: Track prompts and accuracy at each iteration
 
 ## Installation
@@ -74,7 +74,7 @@ optimizer = PromptOptimizer(
 # Run optimization
 results = optimizer.optimize(
     data=data,
-    initial_prompt="Extract all PII entities from the text.",
+    initial_prompt="Extract all relevant fields from the text.",
 )
 
 # Get best result
@@ -117,3 +117,4 @@ prompt-optimizer/
 ## License
 
 MIT
+

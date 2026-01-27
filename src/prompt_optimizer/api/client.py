@@ -102,7 +102,7 @@ class OpenRouterClient:
 
         Examples:
             >>> from prompt_optimizer.models import TargetResult
-            >>> messages = [{"role": "user", "content": "Extract PII from: John"}]
+            >>> messages = [{"role": "user", "content": "Extract data from: John"}]
             >>> response = client.chat(messages, TargetResult)
             >>> isinstance(response, TargetResult)
             True

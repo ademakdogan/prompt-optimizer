@@ -7,7 +7,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from prompt_optimizer.api.client import OpenRouterClient
-from prompt_optimizer.models import PIIResponse
 
 
 class TestOpenRouterClient:
@@ -49,17 +48,22 @@ class TestOpenRouterClient:
         mock_instructor: MagicMock,
     ) -> None:
         """Test chat method returns structured response."""
+        from pydantic import BaseModel
+        
+        class MockResponse(BaseModel):
+            value: str = ""
+        
         mock_patched_client = MagicMock()
         mock_instructor.from_openai.return_value = mock_patched_client
         
-        mock_response = PIIResponse(entities=[], masked_text="")
+        mock_response = MockResponse(value="test")
         mock_patched_client.chat.completions.create.return_value = mock_response
         
         client = OpenRouterClient(model="test-model", api_key="test-key")
         
         result = client.chat(
             messages=[{"role": "user", "content": "Test"}],
-            response_model=PIIResponse,
+            response_model=MockResponse,
         )
         
         assert result == mock_response

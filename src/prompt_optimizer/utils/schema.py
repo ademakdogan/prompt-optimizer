@@ -10,7 +10,6 @@ from typing import Type
 
 from pydantic import BaseModel
 
-from prompt_optimizer.models import PIIResponse, PIIEntity
 from prompt_optimizer.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -28,8 +27,8 @@ def export_schema(model: Type[BaseModel], indent: int = 2) -> str:
         str: JSON schema as formatted string.
 
     Examples:
-        >>> from prompt_optimizer.models import PIIResponse
-        >>> schema = export_schema(PIIResponse)
+        >>> from prompt_optimizer.models import ExtractionSchema
+        >>> schema = export_schema(ExtractionSchema)
         >>> "properties" in schema
         True
     """
@@ -39,61 +38,52 @@ def export_schema(model: Type[BaseModel], indent: int = 2) -> str:
 
 def get_response_schema_description() -> str:
     """
-    Get a human-readable description of the PIIResponse schema.
+    Get a human-readable description of the expected response schema.
 
     Returns:
         str: Schema description for use in prompts.
 
     Examples:
         >>> desc = get_response_schema_description()
-        >>> "entities" in desc
+        >>> "JSON" in desc
         True
     """
     return """
-The response should be a JSON object with the following structure:
+The response should be a JSON object containing extracted field values.
+
+Format: A flat JSON object where keys are field names and values are the 
+extracted data as strings. Only include fields that are found in the text.
+
+Example:
 {
-    "entities": [
-        {
-            "value": "The actual PII text found",
-            "label": "The PII type (e.g., EMAIL, FIRSTNAME, PHONE)",
-            "start": 0,  // Starting character position
-            "end": 10    // Ending character position
-        }
-    ],
-    "masked_text": "The input text with PII replaced by [LABEL] placeholders"
+    "firstname": "John",
+    "email": "john@example.com",
+    "amount": "$1,250.00"
 }
 
-Available PII types include: FIRSTNAME, LASTNAME, EMAIL, PHONENUMBER, 
-ADDRESS, SSN, CREDITCARDNUMBER, DATE, TIME, URL, IP, USERNAME, PASSWORD,
-NEARBYGPSCOORDINATE, USERAGENT, JOBTITLE, COUNTY, ACCOUNTNUMBER, etc.
+Rules:
+- Only extract information explicitly present in the text
+- Omit fields that are not found
+- Return exact values as they appear (preserve formatting)
+- Return ONLY valid JSON, no additional text
 """
 
 
-def get_pii_entity_schema() -> dict:
+def get_extraction_schema(model: Type[BaseModel]) -> dict:
     """
-    Get the JSON schema for PIIEntity.
+    Get the JSON schema for an extraction model.
+
+    Args:
+        model: The Pydantic model class to get schema for.
 
     Returns:
         dict: JSON schema dictionary.
 
     Examples:
-        >>> schema = get_pii_entity_schema()
+        >>> from prompt_optimizer.models import ExtractionSchema
+        >>> schema = get_extraction_schema(ExtractionSchema)
         >>> schema["type"] == "object"
         True
     """
-    return PIIEntity.model_json_schema()
+    return model.model_json_schema()
 
-
-def get_pii_response_schema() -> dict:
-    """
-    Get the JSON schema for PIIResponse.
-
-    Returns:
-        dict: JSON schema dictionary.
-
-    Examples:
-        >>> schema = get_pii_response_schema()
-        >>> "entities" in schema.get("properties", {})
-        True
-    """
-    return PIIResponse.model_json_schema()

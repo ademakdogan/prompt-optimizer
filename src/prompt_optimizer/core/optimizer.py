@@ -14,7 +14,7 @@ from prompt_optimizer.api import AgentModel, MentorModel
 from prompt_optimizer.api.mentor import IterationHistory, FailedPrediction
 from prompt_optimizer.config import get_settings
 from prompt_optimizer.core.evaluator import Evaluator, EvaluationResult
-from prompt_optimizer.models import OptimizationResult
+from prompt_optimizer.models import OptimizationResult, generate_default_prompt, get_schema_field_descriptions
 from prompt_optimizer.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -108,8 +108,11 @@ class PromptOptimizer:
         # Get initial prompt if not provided
         current_prompt = initial_prompt
         if current_prompt is None:
-            logger.info("No initial prompt provided, generating from mentor")
-            current_prompt = self._generate_initial_prompt(data)
+            logger.info("No initial prompt provided, generating from ExtractionSchema")
+            current_prompt = generate_default_prompt()
+            # Initialize field descriptions from schema
+            self.field_descriptions = get_schema_field_descriptions()
+            logger.info(f"Generated default prompt with {len(self.field_descriptions)} fields")
         
         results: list[OptimizationResult] = []
         
