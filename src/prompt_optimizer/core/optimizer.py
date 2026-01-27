@@ -341,6 +341,9 @@ Field descriptions: {len(result.field_descriptions)}
         
         best_result = max(results, key=lambda r: r.accuracy)
         
+        # Build the optimization metrics table
+        metrics_table = self._build_metrics_table(results)
+        
         logger.info(f"""
 {'='*60}
 OPTIMIZATION COMPLETE
@@ -349,11 +352,8 @@ Total iterations: {len(results)}
 Best accuracy: {best_result.accuracy:.2%} (iteration {best_result.iteration})
 Final accuracy: {results[-1].accuracy:.2%}
 
-Accuracy progression:
+{metrics_table}
 """)
-        for result in results:
-            bar = "█" * int(result.accuracy * 20)
-            logger.info(f"  Iteration {result.iteration}: {result.accuracy:.2%} {bar}")
         
         logger.info(f"\nBest prompt (iteration {best_result.iteration}):")
         logger.info(best_result.prompt)
@@ -369,3 +369,45 @@ Accuracy progression:
             accuracy=best_result.accuracy * 100,
             iteration=best_result.iteration,
         )
+
+    def _build_metrics_table(self, results: list[OptimizationResult]) -> str:
+        """
+        Build a formatted metrics table showing iteration accuracy.
+        
+        For more than 10 iterations, shows first 3 and last 3 with '...' in between.
+        
+        Args:
+            results: All optimization results.
+            
+        Returns:
+            str: Formatted metrics table.
+        """
+        lines = []
+        lines.append("OPTIMIZATION METRICS")
+        lines.append("+" + "-"*12 + "+" + "-"*15 + "+" + "-"*22 + "+")
+        lines.append("| Iteration  | Accuracy      | Progress             |")
+        lines.append("+" + "-"*12 + "+" + "-"*15 + "+" + "-"*22 + "+")
+        
+        def format_row(result: OptimizationResult) -> str:
+            bar_width = 20
+            filled = int(result.accuracy * bar_width)
+            bar = "█" * filled + "░" * (bar_width - filled)
+            return f"| {result.iteration:^10} | {result.accuracy:>11.1%}  | {bar} |"
+        
+        if len(results) <= 10:
+            # Show all iterations
+            for result in results:
+                lines.append(format_row(result))
+        else:
+            # Show first 3, ..., last 3
+            for result in results[:3]:
+                lines.append(format_row(result))
+            
+            lines.append(f"| {'...':^10} | {'...':^13} | {'...':^20} |")
+            
+            for result in results[-3:]:
+                lines.append(format_row(result))
+        
+        lines.append("+" + "-"*12 + "+" + "-"*15 + "+" + "-"*22 + "+")
+        
+        return "\n".join(lines)

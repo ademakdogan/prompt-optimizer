@@ -37,8 +37,12 @@ class Settings(BaseSettings):
     )
 
     openrouter_api_key: str = ""
-    agent_model: str = "openai/gpt-5-nano"
-    mentor_model: str = "openai/gpt-5-nano"
+    #agent_model: str = "openai/gpt-5-nano"
+    #mentor_model: str = "openai/gpt-5-nano"
+    #agent_model: str = "openai/gpt-5-mini"
+    #mentor_model: str = "openai/gpt-5-mini"
+    agent_model: str = "openai/gpt-4.1-nano"
+    mentor_model: str = "openai/gpt-4.1-nano"
     window_size: int = 2
     loop_count: int = 3
     log_level: str = "INFO"
