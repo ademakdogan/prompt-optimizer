@@ -341,19 +341,10 @@ Field descriptions: {len(result.field_descriptions)}
         
         best_result = max(results, key=lambda r: r.accuracy)
         
-        # Build the optimization metrics table
+        # Build the unified optimization metrics table
         metrics_table = self._build_metrics_table(results)
         
-        logger.info(f"""
-{'='*60}
-OPTIMIZATION COMPLETE
-{'='*60}
-Total iterations: {len(results)}
-Best accuracy: {best_result.accuracy:.2%} (iteration {best_result.iteration})
-Final accuracy: {results[-1].accuracy:.2%}
-
-{metrics_table}
-""")
+        logger.info(f"\n{metrics_table}")
         
         logger.info(f"\nBest prompt (iteration {best_result.iteration}):")
         logger.info(best_result.prompt)
@@ -372,7 +363,7 @@ Final accuracy: {results[-1].accuracy:.2%}
 
     def _build_metrics_table(self, results: list[OptimizationResult]) -> str:
         """
-        Build a formatted metrics table showing iteration accuracy.
+        Build a unified formatted metrics table showing summary and iteration accuracy.
         
         For more than 10 iterations, shows first 3 and last 3 with '...' in between.
         
@@ -382,17 +373,38 @@ Final accuracy: {results[-1].accuracy:.2%}
         Returns:
             str: Formatted metrics table.
         """
+        best_result = max(results, key=lambda r: r.accuracy)
+        first_accuracy = results[0].accuracy
+        final_accuracy = results[-1].accuracy
+        improvement = final_accuracy - first_accuracy
+        avg_accuracy = sum(r.accuracy for r in results) / len(results)
+        
+        # Table width
+        width = 60
+        
         lines = []
-        lines.append("OPTIMIZATION METRICS")
-        lines.append("+" + "-"*12 + "+" + "-"*15 + "+" + "-"*22 + "+")
-        lines.append("| Iteration  | Accuracy      | Progress             |")
-        lines.append("+" + "-"*12 + "+" + "-"*15 + "+" + "-"*22 + "+")
+        lines.append("╔" + "═" * width + "╗")
+        lines.append("║" + " OPTIMIZATION METRICS".ljust(width) + "║")
+        lines.append("╠" + "═" * width + "╣")
+        
+        # Summary section
+        lines.append(f"║  Total iterations:      {len(results):<34}║")
+        lines.append(f"║  Best accuracy:         {best_result.accuracy:.2%} (iteration {best_result.iteration})" + " " * (width - 41 - len(str(best_result.iteration))) + "║")
+        lines.append(f"║  Final accuracy:        {final_accuracy:.2%}" + " " * (width - 27) + "║")
+        lines.append(f"║  Accuracy improvement:  {improvement:+.2%}" + " " * (width - 28) + "║")
+        lines.append(f"║  Average accuracy:      {avg_accuracy:.2%}" + " " * (width - 27) + "║")
+        
+        lines.append("╠" + "═" * width + "╣")
+        lines.append("║  ITERATION DETAILS" + " " * (width - 19) + "║")
+        lines.append("╠" + "═" * 12 + "╦" + "═" * 14 + "╦" + "═" * (width - 28) + "╣")
+        lines.append("║ Iteration  ║   Accuracy   ║ Progress" + " " * (width - 37) + "║")
+        lines.append("╠" + "═" * 12 + "╬" + "═" * 14 + "╬" + "═" * (width - 28) + "╣")
         
         def format_row(result: OptimizationResult) -> str:
-            bar_width = 20
+            bar_width = width - 40
             filled = int(result.accuracy * bar_width)
             bar = "█" * filled + "░" * (bar_width - filled)
-            return f"| {result.iteration:^10} | {result.accuracy:>11.1%}  | {bar} |"
+            return f"║ {result.iteration:^10} ║ {result.accuracy:>10.1%}   ║ {bar} ║"
         
         if len(results) <= 10:
             # Show all iterations
@@ -403,11 +415,12 @@ Final accuracy: {results[-1].accuracy:.2%}
             for result in results[:3]:
                 lines.append(format_row(result))
             
-            lines.append(f"| {'...':^10} | {'...':^13} | {'...':^20} |")
+            bar_width = width - 40
+            lines.append(f"║ {'...':^10} ║ {'...':^12} ║ {'...':^{bar_width}} ║")
             
             for result in results[-3:]:
                 lines.append(format_row(result))
         
-        lines.append("+" + "-"*12 + "+" + "-"*15 + "+" + "-"*22 + "+")
+        lines.append("╚" + "═" * 12 + "╩" + "═" * 14 + "╩" + "═" * (width - 28) + "╝")
         
         return "\n".join(lines)

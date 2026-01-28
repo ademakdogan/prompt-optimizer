@@ -1,53 +1,27 @@
 # Final Optimized Prompt
-# Best accuracy achieved: 100.0%
-# Iteration: 3
-# Generated: 2026-01-14 01:28:21
+# Best accuracy achieved: 64.1%
+# Iteration: 2
+# Generated: 2026-01-14 01:38:10
 
-Extract structured fields from the input text and return a single flat JSON object containing only the fields that are present exactly as described below. Do not invent or normalize values beyond what appears in the text. Preserve punctuation, casing, and spacing for identifiers (e.g., usernames, IDs, emails, user-agent strings). If a field is not present, omit it from the JSON. Output only the JSON object, no explanatory text.
+Extract the following information from the data:
 
-Key extraction rules and examples of expected behavior
-- Only include keys that are explicitly present in the text. Do not infer or split tokens (for example, do not split an email into firstname/lastname or derive names from usernames or local-parts).
-- Preserve the original token format exactly as in the source text (including brackets, separators, AM/PM, currency symbols and trailing currency codes).
-- Treat all extracted values as strings in the JSON (e.g., age: "68", not 68).
+- firstname: The first name of the person.
+- lastname: The last name of the person. If a full name is provided, extract the last name.
+- prefix: Honorifics or titles like Mr., Mrs., Dr., etc.
+- age: The age of the person as a number.
+- eyecolor: The eye color of the person.
+- jobtitle: The job title or professional role of the person.
+- email: The email address of the person in the format user@domain.com.
+- phonenumber: The phone number of the person.
+- street: The street name and number for a physical address.
+- county: The county or region name.
+- accountnumber: A bank or service account number. This can include alphanumeric characters and hyphens.
+- amount: The monetary amount, including the currency symbol if present.
+- currency: The currency code (e.g., USD, EUR).
+- maskednumber: Partial or masked card/account numbers, typically the last 4 digits.
+- pin: A Personal Identification Number or security code. This is usually a sequence of digits.
+- password: A user's password.
+- nearbygpscoordinate: GPS coordinates in the format [latitude,longitude].
+- useragent: The user agent string from a browser or client.
 
-Fields to extract (include exactly these keys when present):
-- firstname: Given name as it appears separately in the text (a standalone name token before whitespace or punctuation). Only extract a firstname when the text contains the actual name token (e.g., "Carleton", "Janessa"). Do NOT extract firstname from an email, username, unique ID, or local-part (e.g., from "janessa.smith@..." or "Emilie_Beatty53@..."), unless the text also separately contains the person's explicit full name (e.g., "Emilie Beatty"). If a multi-word given name appears explicitly ("Mary Anne"), extract it exactly.
-- lastname: Family/surname as it appears explicitly in the text. Only extract when the surname token appears separately (e.g., "Vandervort", "Beatty"). Do NOT derive lastname from emails, usernames, or IDs unless the text includes the full name as distinct tokens (separated by whitespace or punctuation).
-- prefix: Honorifics/titles exactly as written (e.g., "Mr.", "Dr", "Prof."). Include any trailing punctuation present in the source text.
-- age: Age in years as a numeric string (e.g., "68"). If text uses words like "turning sixty-eight" do NOT convert unless the numeric equivalent appears explicitly.
-- eyecolor: If the source text includes an eye color label (e.g., "Eye color: Brown") extract the full labeled phrase exactly as written. If only a color word is present (e.g., "Brown", "blue-green") extract that color token exactly. Only extract when the text explicitly mentions eye color.
-- jobtitle: Full job title exactly as written and contiguous in the text (e.g., "Human Group Coordinator"). Preserve capitalization and spacing.
-- email: Full email address in user@domain format exactly as it appears. Preserve case.
-- phonenumber: Phone number as it appears (e.g., "555-0123", "+1 (555) 123-4567"). Preserve separators and spacing.
-- street: Full street address exactly as written (e.g., "609 Gorczany Pass").
-- county: County, region, or city token(s) exactly as written (e.g., "Cleveland"). Use the exact token(s) from the text.
-- accountnumber: Explicit bank or service account number or other structured account identifiers that are clearly labeled as an "account", "account number", or "account #". Extract the token exactly as written (e.g., "63652332"). Do NOT include order numbers (e.g., "#ORD-7842"), usernames, or arbitrary IDs here.
-- amount: Monetary amount including currency symbol and formatting exactly as in the text (e.g., "$1,250.00"). Include decimal and thousand separators exactly.
-- currency: Currency code or currency word adjacent to the amount if present (e.g., "USD" in "$1,250.00 USD"). Extract the currency token exactly.
-- maskednumber: Masked or partial card/account numbers as shown (e.g., "4532" from "ending in 4532"). If the masking characters are the only form (e.g., "**** 4532"), include masking characters as they appear. Prefer extracting only the numeric portion when both are present, unless only masking characters are available.
-- pin: Short numeric or numeric+alpha security codes explicitly labeled as "PIN" or "security code" in the text. PINs are typically 4–6 characters; do NOT treat long alphanumeric tokens as PINs.
-- password: Strings explicitly labelled or phrased as a password (e.g., "Your password is ...", "password:"). Preserve the full token exactly. Do not mark unlabeled long IDs as passwords.
-- username: Explicit username or unique login ID when the text labels it as "username", "unique ID", "your ID", or similar. Preserve the token exactly. Do NOT place order numbers or unrelated IDs here.
-- nearbygpscoordinate: GPS coordinate pairs in square brackets or parentheses when present (e.g., "[-71.6702,-107.6572]"). Preserve bracket type, punctuation and numeric formatting exactly.
-- useragent: Full user-agent string exactly as a contiguous token (e.g., "Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:12.5) Gecko/20100101 Firefox/12.5.9"). Extract the entire contiguous user-agent token including parentheses and slashes.
-- time: Time mentions exactly as written (e.g., "10:18 PM", "22:30"). Preserve AM/PM.
-
-Disambiguation priorities and explicit rules (to avoid common errors observed):
-1. accountnumber vs username vs order numbers: Use surrounding label tokens. If text contains the phrase "account", "account number", or "account #" immediately before the token, classify as accountnumber. If token is labelled "username", "unique ID", or "your ID", classify as username. If token contains order markers like "order #", "#ORD-", "Order:", do NOT classify as accountnumber or username; omit unless an order field exists.
-2. Password vs PIN vs username: PIN must be explicitly labelled "PIN" or "security code" and be short (4–6 chars, usually numeric). Do not extract long alphanumeric strings as PIN — label them as password or username depending on context.
-3. Names and emails: Never infer firstname/lastname from an email local-part or username. Only extract names when explicit name tokens appear separately in the text (not embedded in identifiers).
-4. User-agent and GPS: These may appear mid-sentence; extract them as the full contiguous token including brackets and punctuation.
-5. Eyecolor labeling: If the phrase includes the label "Eye" or "Eye color" extract the labeled phrase; otherwise extract single color token.
-6. Numeric types: Always return numeric-like fields (age, amount, maskednumber, pin) as strings in JSON to preserve formatting.
-
-Output requirements:
-- Return a single flat JSON object with only the extracted keys that were found in the text. All values must be strings.
-- Do not output any explanation text.
-
-Example correct behaviors:
-- Input: "Carleton, the new tools are set to arrive at [-38.9302,113.5422]. Your password: yZqd7gHyZq91."
-  Output: {"firstname": "Carleton", "nearbygpscoordinate": "[-38.9302,113.5422]", "password": "yZqd7gHyZq91"}
-- Input: "Please reach out to Janessa at janessa.smith@company.org or call 555-0123 for the latest updates on your order #ORD-7842. Payment of $1,250.00 USD was processed using card ending in 4532."
-  Output: {"firstname": "Janessa", "email": "janessa.smith@company.org", "phonenumber": "555-0123", "amount": "$1,250.00", "currency": "USD", "maskednumber": "4532"}
-
-Reasoning for prompt changes: Emphasized never deriving names from emails (this was a frequent error), clarified password vs PIN vs username disambiguation, required all extracted values to be strings to avoid numeric casting errors (age became integer previously), reinforced treating user-agent and GPS as contiguous tokens, and clarified eyecolor extraction to match both labeled and unlabeled forms. These address the main failure modes observed in the history.
+Return the extracted information as a JSON object. Only include fields that are found in the text. Omit fields that are not present. Do not infer information that is not explicitly stated. For example, if only a last name is provided, do not attempt to infer a first name.
