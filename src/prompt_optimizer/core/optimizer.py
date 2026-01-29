@@ -20,6 +20,22 @@ from prompt_optimizer.utils.logging import get_logger
 logger = get_logger(__name__)
 
 
+def _count_tokens(text: str) -> int:
+    """
+    Estimate token count for a text string.
+    
+    Uses a simple approximation: ~4 characters per token on average.
+    This is a rough estimate but works well for comparison purposes.
+    
+    Args:
+        text: The text to count tokens for.
+        
+    Returns:
+        int: Estimated token count.
+    """
+    return len(text) // 4 + 1
+
+
 class PromptOptimizer:
     """
     Main optimizer class for prompt optimization loop.
@@ -339,7 +355,7 @@ Field descriptions: {len(result.field_descriptions)}
             logger.warning("No optimization results to summarize")
             return
         
-        best_result = max(results, key=lambda r: r.accuracy)
+        best_result = self._get_best_result(results)
         
         # Build the unified optimization metrics table
         metrics_table = self._build_metrics_table(results)
@@ -373,7 +389,7 @@ Field descriptions: {len(result.field_descriptions)}
         Returns:
             str: Formatted metrics table.
         """
-        best_result = max(results, key=lambda r: r.accuracy)
+        best_result = self._get_best_result(results)
         first_accuracy = results[0].accuracy
         final_accuracy = results[-1].accuracy
         improvement = final_accuracy - first_accuracy
@@ -389,7 +405,12 @@ Field descriptions: {len(result.field_descriptions)}
         
         # Summary section
         lines.append(f"║  Total iterations:      {len(results):<34}║")
-        lines.append(f"║  Best accuracy:         {best_result.accuracy:.2%} (iteration {best_result.iteration})" + " " * (width - 41 - len(str(best_result.iteration))) + "║")
+        
+        # Best result info with token count
+        best_tokens = _count_tokens(best_result.prompt)
+        best_info = f"{best_result.accuracy:.2%} (iter {best_result.iteration}, ~{best_tokens} tokens)"
+        lines.append(f"║  Best accuracy:         {best_info}" + " " * (width - 26 - len(best_info)) + "║")
+        
         lines.append(f"║  Final accuracy:        {final_accuracy:.2%}" + " " * (width - 27) + "║")
         lines.append(f"║  Accuracy improvement:  {improvement:+.2%}" + " " * (width - 28) + "║")
         lines.append(f"║  Average accuracy:      {avg_accuracy:.2%}" + " " * (width - 27) + "║")
@@ -424,3 +445,41 @@ Field descriptions: {len(result.field_descriptions)}
         lines.append("╚" + "═" * 12 + "╩" + "═" * 14 + "╩" + "═" * (width - 28) + "╝")
         
         return "\n".join(lines)
+
+    def _get_best_result(self, results: list[OptimizationResult]) -> OptimizationResult:
+        """
+        Get the best optimization result.
+        
+        Selection criteria:
+        1. Highest accuracy
+        2. If tied: lowest token count (shorter prompt preferred)
+        
+        Args:
+            results: All optimization results.
+            
+        Returns:
+            OptimizationResult: The best result based on accuracy and token count.
+        """
+        if not results:
+            raise ValueError("No results to select from")
+        
+        # Sort by accuracy (descending), then by token count (ascending)
+        sorted_results = sorted(
+            results,
+            key=lambda r: (-r.accuracy, _count_tokens(r.prompt))
+        )
+        
+        best = sorted_results[0]
+        
+        # Log if there were ties resolved by token count
+        same_accuracy = [r for r in results if r.accuracy == best.accuracy]
+        if len(same_accuracy) > 1:
+            token_counts = [(r.iteration, _count_tokens(r.prompt)) for r in same_accuracy]
+            logger.info(
+                f"Multiple iterations with {best.accuracy:.2%} accuracy. "
+                f"Selected iteration {best.iteration} with fewest tokens (~{_count_tokens(best.prompt)})."
+            )
+            logger.debug(f"Token counts for tied iterations: {token_counts}")
+        
+        return best
+
