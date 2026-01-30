@@ -54,24 +54,37 @@ class ExtractionSchema(BaseModel):
         'John'
     """
 
-    # Personal Information
-    #firstname: Optional[str] = Field(None, description="The first name of the person.")
-    #lastname: Optional[str] = Field(None, description="The last name of the person.")
-    #prefix: Optional[str] = Field(None, description="Honorifics or titles like Mr., Mrs., Dr.")
-    #age: Optional[str] = Field(None, description="Age of the person.")
-    #eyecolor: Optional[str] = Field(None, description="Eye color description.")
-    #jobtitle: Optional[str] = Field(None, description="Job title or professional role.")
-    ## Contact Information
-    #email: Optional[str] = Field(None, description="Email address found in the text.")
-    #phonenumber: Optional[str] = Field(None, description="Phone number contact.")
-    #street: Optional[str] = Field(None, description="Street address or physical location.")
-    #county: Optional[str] = Field(None, description="County or region name.")
-    ## Financial Information
-    #accountnumber: Optional[str] = Field(None, description="Bank or service account number.")
-    #amount: Optional[str] = Field(None, description="Monetary amount including currency symbol if present.")
-    #currency: Optional[str] = Field(None, description="Currency code like USD, EUR.")
-    #maskednumber: Optional[str] = Field(None, description="Partial or masked card/account numbers (e.g., last 4 digits).")
-    #pin: Optional[str] = Field(None, description="Personal Identification Number or security code.")
+    # ═══════════════════════════════════════════════════════════════════════════
+    # 🔧 USER CUSTOMIZATION SECTION - MODIFY THIS FOR YOUR DATASET
+    # ═══════════════════════════════════════════════════════════════════════════
+    #
+    # Define your extraction fields here based on the `target_result` keys
+    # in your dataset JSON file. Each field should match a key from your
+    # ground truth data.
+    #
+    # INSTRUCTIONS:
+    # 1. Look at your dataset's `target_result` objects
+    # 2. Add a field for each key you want to extract
+    # 3. Use Optional[type] for fields that don't appear in every sample
+    # 4. Add descriptions to help the AI understand what to look for
+    #
+    # EXAMPLE 1: NER/Entity Extraction (see resources/test_pii.json)
+    # ─────────────────────────────────────────────────────────────────
+    # firstname: Optional[str] = Field(None, description="First name of the person")
+    # email: Optional[str] = Field(None, description="Email address")
+    # phonenumber: Optional[str] = Field(None, description="Phone number")
+    # amount: Optional[str] = Field(None, description="Monetary amount with currency symbol")
+    #
+    # EXAMPLE 2: Calculation/Mapping (see resources/test_mapping.json)
+    # ─────────────────────────────────────────────────────────────────
+    # client_name: str  # Required field
+    # total_gross: float  # gross + vat
+    # total_mid_gross: float  # total_gross + (commission_rate * gross)
+    # net_payable: Optional[float] = None  # total_mid_gross - deduction
+    #
+    # ═══════════════════════════════════════════════════════════════════════════
+    
+    # Current schema for test_mapping.json dataset:
     client_name: str
     total_gross: float
     total_mid_gross: float

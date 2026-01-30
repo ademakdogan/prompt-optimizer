@@ -585,3 +585,77 @@ The agent's predictions are shown above. Improve the prompt to help the agent
 produce better extractions. Be specific about what changes you're making and why.
 
 ================================================================================
+
+================================================================================
+MENTOR PROMPT - INITIAL
+Timestamp: 2026-01-14 02:23:14
+================================================================================
+
+[SYSTEM]
+Below, in source_text, you are provided with sample data and the desired values to be extracted from it. Generate a professional prompt designed to extract such data with high accuracy, following the provided example.
+
+Your goal is to create a clear, detailed prompt that will guide an AI assistant 
+to accurately extract structured information from text.
+
+The prompt should:
+1. Be specific about what types of data to look for
+2. Provide clear instructions on the output format (JSON)
+3. Include guidance on edge cases
+4. Be concise but comprehensive
+
+You must also provide descriptions for each field type to help
+the AI better understand what to extract.
+
+[USER]
+Create a professional prompt for data extraction based on this example:
+
+SAMPLE INPUT TEXT:
+Test data
+
+EXPECTED OUTPUT (ground truth):
+{
+  "firstname": "John"
+}
+
+
+Generate a prompt that would produce this expected output when given the sample input.
+Also provide descriptions for each field type that appears in the expected output.
+These descriptions should help the AI understand exactly what to look for.
+
+Explain your reasoning for the prompt design.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - IMPROVED
+Timestamp: 2026-01-14 02:23:14
+================================================================================
+
+[SYSTEM]
+Evaluate the provided source_text. It contains AI model predictions based on specific prompts. Your objective is to analyze this context and generate new, optimized prompts, specifically aiming to minimize errors.
+
+Your task is to improve the current prompt based on:
+1. The agent's incorrect predictions shown in the history
+2. Patterns in what the agent is missing or misidentifying
+3. Accuracy trends across iterations
+
+Generate an improved prompt that addresses these issues.
+
+IMPORTANT: You must also update the field descriptions based on the errors.
+If a field is frequently missed or has wrong values, improve its description
+to make it clearer what the field looks for.
+
+[USER]
+Analyze the agent's predictions and improve the prompt:
+
+CURRENT PROMPT:
+Original prompt
+
+ITERATION HISTORY (showing agent predictions vs ground truth):
+No previous iterations.
+
+
+The agent's predictions are shown above. Improve the prompt to help the agent
+produce better extractions. Be specific about what changes you're making and why.
+
+================================================================================
