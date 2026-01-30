@@ -69,4 +69,8 @@ venv.bak/
 # uv
 .python-version
 uv.lock
+<<<<<<< HEAD
 resources/pii/pii_backup
+=======
+resources/pii/
+>>>>>>> 428d8a3 (Remove duplicate OPTIMIZATION METRICS table, update tests for new schema)

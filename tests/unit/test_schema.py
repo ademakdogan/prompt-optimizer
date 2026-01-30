@@ -24,8 +24,8 @@ class TestExportSchema:
         assert isinstance(schema, str)
         parsed = json.loads(schema)
         assert "properties" in parsed
-        assert "firstname" in parsed["properties"]
-        assert "email" in parsed["properties"]
+        assert "client_name" in parsed["properties"]
+        assert "total_gross" in parsed["properties"]
 
     def test_export_schema_with_indent(self) -> None:
         """Test exporting schema with custom indent."""
@@ -33,7 +33,7 @@ class TestExportSchema:
         
         parsed = json.loads(schema)
         assert "properties" in parsed
-        assert "amount" in parsed["properties"]
+        assert "total_mid_gross" in parsed["properties"]
 
 
 class TestGetResponseSchemaDescription:
@@ -46,11 +46,11 @@ class TestGetResponseSchemaDescription:
         assert "JSON" in desc
 
     def test_description_contains_example(self) -> None:
-        """Test that description includes an example."""
+        """Test that description includes field names."""
         desc = get_response_schema_description()
         
-        assert "firstname" in desc
-        assert "email" in desc
+        assert "client_name" in desc
+        assert "total_gross" in desc
 
 
 class TestGetExtractionSchema:
@@ -62,15 +62,16 @@ class TestGetExtractionSchema:
         
         assert isinstance(schema, dict)
         assert "properties" in schema
-        assert "firstname" in schema["properties"]
-        assert "email" in schema["properties"]
-        assert "amount" in schema["properties"]
+        assert "client_name" in schema["properties"]
+        assert "total_gross" in schema["properties"]
+        assert "total_mid_gross" in schema["properties"]
 
-    def test_schema_has_descriptions(self) -> None:
-        """Test that schema fields have descriptions."""
+    def test_schema_has_required_fields(self) -> None:
+        """Test that schema has required fields defined."""
         schema = get_extraction_schema(ExtractionSchema)
         
-        firstname_prop = schema["properties"]["firstname"]
-        assert "description" in firstname_prop
-        assert "first name" in firstname_prop["description"].lower()
+        # Check required fields are marked
+        assert "required" in schema
+        assert "client_name" in schema["required"]
+        assert "total_gross" in schema["required"]
 

@@ -1,0 +1,70 @@
+[
+  {
+    "source_text": "\"name\": 'TechSolutions Inc', \"gross\": 1000, \"commission_rate\": 0.1, \"vat\": 180",
+    "target_result": {
+      "client_name": "TechSolutions Inc",
+      "total_gross": 1180,
+      "total_mid_gross": 1280
+    }
+  },
+  {
+    "source_text": "\"gross\": 500, \"vat\": 50, \"commission_rate\": 0.2, \"name\": 'Creative Studio'",
+    "target_result": {
+      "client_name": "Creative Studio",
+      "total_gross": 550,
+      "total_mid_gross": 650
+    }
+  },
+  {
+    "source_text": "\"name\": 'Alpha Logistics', \"gross\": 2000.50, \"vat\": 360.09, \"commission_rate\": 0.05",
+    "target_result": {
+      "client_name": "Alpha Logistics",
+      "total_gross": 2360.59,
+      "total_mid_gross": 2460.615
+    }
+  },
+  {
+    "source_text": "\"commission_rate\": 0.15, \"name\": 'Omega Retail', \"gross\": 100, \"vat\": 20, \"deduction\": 5",
+    "target_result": {
+      "client_name": "Omega Retail",
+      "total_gross": 120,
+      "total_mid_gross": 135,
+      "net_payable": 130
+    }
+  },
+  {
+    "source_text": "\"name\": 'Freelancer John', \"gross\": 300, \"vat\": 0, \"commission_rate\": 0.1",
+    "target_result": {
+      "client_name": "Freelancer John",
+      "total_gross": 300,
+      "total_mid_gross": 330
+    }
+  },
+  {
+    "source_text": "\"vat\": 200, \"name\": 'Global Import', \"gross\": 1000, \"commission_rate\": 0.0, \"deduction\": 100",
+    "target_result": {
+      "client_name": "Global Import",
+      "total_gross": 1200,
+      "total_mid_gross": 1200,
+      "net_payable": 1100
+    }
+  },
+  {
+    "source_text": "\"name\": 'SoftServe Ltd', \"gross\": 1500, \"commission_rate\": 0.1, \"vat\": 270, \"currency\": \"USD\"",
+    "target_result": {
+      "client_name": "SoftServe Ltd",
+      "total_gross": 1770,
+      "total_mid_gross": 1920,
+      "currency_code": "USD"
+    }
+  },
+  {
+    "source_text": "\"gross\": 250, \"vat\": 45, \"commission_rate\": 0.5, \"name\": 'HighRisk Partners', \"deduction\": 10",
+    "target_result": {
+      "client_name": "HighRisk Partners",
+      "total_gross": 295,
+      "total_mid_gross": 420,
+      "net_payable": 410
+    }
+  }
+]

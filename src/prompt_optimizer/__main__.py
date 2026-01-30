@@ -12,7 +12,6 @@ from prompt_optimizer.config import get_settings
 from prompt_optimizer.core import PromptOptimizer
 from prompt_optimizer.data import load_test_data
 from prompt_optimizer.utils.logging import setup_logging, get_logger
-from prompt_optimizer.utils.metrics import calculate_metrics, format_metrics_report
 from prompt_optimizer.utils.persistence import save_results
 
 
@@ -138,24 +137,10 @@ def main() -> int:
         traceback.print_exc()
         return 1
     
-    # Calculate and display metrics
-    if results:
-        metrics = calculate_metrics(results)
-        if metrics:
-            print(format_metrics_report(metrics))
-        
-        best = max(results, key=lambda r: r.accuracy)
-        logger.info(f"\n{'='*60}")
-        logger.info("BEST PROMPT")
-        logger.info("=" * 60)
-        logger.info(f"Accuracy: {best.accuracy:.2%}")
-        logger.info(f"Iteration: {best.iteration}")
-        logger.info(f"\n{best.prompt}")
-        
-        # Save results if output path provided
-        if args.output:
-            save_results(results, args.output)
-            logger.info(f"Results saved to {args.output}")
+    # Save results if output path provided
+    if results and args.output:
+        save_results(results, args.output)
+        logger.info(f"Results saved to {args.output}")
     
     return 0
 

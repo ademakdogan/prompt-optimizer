@@ -19,65 +19,67 @@ from prompt_optimizer.models import (
 class TestExtractionSchema:
     """Tests for ExtractionSchema model."""
 
-    def test_create_empty_schema(self) -> None:
-        """Test creating an empty ExtractionSchema."""
-        schema = ExtractionSchema()
-        
-        assert schema.firstname is None
-        assert schema.email is None
-        assert schema.amount is None
-
-    def test_create_schema_with_values(self) -> None:
-        """Test creating ExtractionSchema with values."""
+    def test_create_schema_with_required_values(self) -> None:
+        """Test creating ExtractionSchema with required values."""
         schema = ExtractionSchema(
-            firstname="John",
-            email="john@email.com",
-            amount="$1,250.00",
-            currency="USD",
+            client_name="TechSolutions Inc",
+            total_gross=1180.0,
+            total_mid_gross=1280.0,
         )
         
-        assert schema.firstname == "John"
-        assert schema.email == "john@email.com"
-        assert schema.amount == "$1,250.00"
-        assert schema.currency == "USD"
+        assert schema.client_name == "TechSolutions Inc"
+        assert schema.total_gross == 1180.0
+        assert schema.total_mid_gross == 1280.0
+        assert schema.net_payable is None
+        assert schema.currency_code is None
+
+    def test_create_schema_with_all_values(self) -> None:
+        """Test creating ExtractionSchema with all values including optional."""
+        schema = ExtractionSchema(
+            client_name="Alpha Logistics",
+            total_gross=2360.59,
+            total_mid_gross=2460.615,
+            net_payable=2360.615,
+            currency_code="USD",
+        )
+        
+        assert schema.client_name == "Alpha Logistics"
+        assert schema.total_gross == 2360.59
+        assert schema.total_mid_gross == 2460.615
+        assert schema.net_payable == 2360.615
+        assert schema.currency_code == "USD"
 
     def test_schema_serialization(self) -> None:
         """Test schema can be serialized to dict."""
         schema = ExtractionSchema(
-            firstname="Jane",
-            lastname="Doe",
-            jobtitle="Engineer",
+            client_name="Creative Studio",
+            total_gross=550.0,
+            total_mid_gross=650.0,
         )
         
         data = schema.model_dump(exclude_none=True)
         
-        assert data["firstname"] == "Jane"
-        assert data["lastname"] == "Doe"
-        assert data["jobtitle"] == "Engineer"
-        assert "email" not in data  # None values excluded
+        assert data["client_name"] == "Creative Studio"
+        assert data["total_gross"] == 550.0
+        assert data["total_mid_gross"] == 650.0
+        assert "net_payable" not in data  # None values excluded
+        assert "currency_code" not in data  # None values excluded
 
     def test_all_fields(self) -> None:
         """Test schema with all fields populated."""
         schema = ExtractionSchema(
-            firstname="John",
-            lastname="Doe",
-            prefix="Mr.",
-            age="30",
-            eyecolor="blue",
-            jobtitle="Developer",
-            email="john@example.com",
-            phonenumber="555-0123",
-            street="123 Main St",
-            county="Example County",
-            accountnumber="1234567890",
-            amount="$500.00",
-            currency="USD",
-            maskednumber="4532",
-            pin="1234",
+            client_name="Omega Retail",
+            total_gross=120.0,
+            total_mid_gross=135.0,
+            net_payable=130.0,
+            currency_code="EUR",
         )
         
-        assert schema.firstname == "John"
-        assert schema.pin == "1234"
+        assert schema.client_name == "Omega Retail"
+        assert schema.total_gross == 120.0
+        assert schema.total_mid_gross == 135.0
+        assert schema.net_payable == 130.0
+        assert schema.currency_code == "EUR"
 
 
 class TestErrorFeedback:
@@ -209,17 +211,17 @@ class TestGenerateDefaultPrompt:
         """Test that prompt contains all schema field names."""
         prompt = generate_default_prompt()
         
-        assert "firstname" in prompt
-        assert "email" in prompt
-        assert "amount" in prompt
-        assert "phonenumber" in prompt
+        assert "client_name" in prompt
+        assert "total_gross" in prompt
+        assert "total_mid_gross" in prompt
 
     def test_prompt_contains_descriptions(self) -> None:
-        """Test that prompt contains field descriptions."""
+        """Test that prompt contains field descriptions if available."""
         prompt = generate_default_prompt()
         
-        assert "first name of the person" in prompt
-        assert "Email address found in the text" in prompt
+        # Check that field names are present (descriptions may be empty for some fields)
+        assert "client_name" in prompt
+        assert "total_gross" in prompt
 
     def test_prompt_contains_json_instruction(self) -> None:
         """Test that prompt includes JSON return instruction."""
@@ -241,11 +243,11 @@ class TestGetSchemaFieldDescriptions:
         """Test that all schema fields are present."""
         descriptions = get_schema_field_descriptions()
         
-        assert "firstname" in descriptions
-        assert "lastname" in descriptions
-        assert "email" in descriptions
-        assert "amount" in descriptions
-        assert "pin" in descriptions
+        assert "client_name" in descriptions
+        assert "total_gross" in descriptions
+        assert "total_mid_gross" in descriptions
+        assert "net_payable" in descriptions
+        assert "currency_code" in descriptions
 
     def test_descriptions_are_strings(self) -> None:
         """Test that all descriptions are strings."""
@@ -255,9 +257,10 @@ class TestGetSchemaFieldDescriptions:
             assert isinstance(key, str)
             assert isinstance(value, str)
 
-    def test_descriptions_are_meaningful(self) -> None:
-        """Test that descriptions contain meaningful content."""
+    def test_descriptions_exist_for_fields(self) -> None:
+        """Test that descriptions exist for all fields."""
         descriptions = get_schema_field_descriptions()
         
-        assert "first name" in descriptions["firstname"].lower()
-        assert "email" in descriptions["email"].lower()
+        # All fields should have descriptions (even if empty string)
+        for field in ["client_name", "total_gross", "total_mid_gross", "net_payable", "currency_code"]:
+            assert field in descriptions

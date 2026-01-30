@@ -1,27 +1,14 @@
 # Final Optimized Prompt
-# Best accuracy achieved: 64.1%
-# Iteration: 2
-# Generated: 2026-01-14 01:38:10
+# Best accuracy achieved: 93.3%
+# Iteration: 3
+# Generated: 2026-01-14 02:05:39
 
 Extract the following information from the data:
 
-- firstname: The first name of the person.
-- lastname: The last name of the person. If a full name is provided, extract the last name.
-- prefix: Honorifics or titles like Mr., Mrs., Dr., etc.
-- age: The age of the person as a number.
-- eyecolor: The eye color of the person.
-- jobtitle: The job title or professional role of the person.
-- email: The email address of the person in the format user@domain.com.
-- phonenumber: The phone number of the person.
-- street: The street name and number for a physical address.
-- county: The county or region name.
-- accountnumber: A bank or service account number. This can include alphanumeric characters and hyphens.
-- amount: The monetary amount, including the currency symbol if present.
-- currency: The currency code (e.g., USD, EUR).
-- maskednumber: Partial or masked card/account numbers, typically the last 4 digits.
-- pin: A Personal Identification Number or security code. This is usually a sequence of digits.
-- password: A user's password.
-- nearbygpscoordinate: GPS coordinates in the format [latitude,longitude].
-- useragent: The user agent string from a browser or client.
+- client_name: The name of the client.
+- total_gross: The total gross amount including any VAT. This should be calculated by summing the 'gross' and 'vat' fields if both are present.
+- total_mid_gross: The total gross amount plus commission. This should be calculated by summing 'total_gross' and the commission amount (commission_rate * gross).
+- net_payable: The final amount payable after all deductions. This should be calculated by subtracting any 'deduction' from 'total_mid_gross'.
+- currency_code: The currency code (e.g., USD, EUR).
 
-Return the extracted information as a JSON object. Only include fields that are found in the text. Omit fields that are not present. Do not infer information that is not explicitly stated. For example, if only a last name is provided, do not attempt to infer a first name.
+Return the extracted information as a JSON object. Only include fields that are found in the text or can be calculated from the provided fields. Omit fields that are not present or cannot be calculated.

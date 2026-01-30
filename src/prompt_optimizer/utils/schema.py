@@ -52,18 +52,19 @@ def get_response_schema_description() -> str:
 The response should be a JSON object containing extracted field values.
 
 Format: A flat JSON object where keys are field names and values are the 
-extracted data as strings. Only include fields that are found in the text.
+extracted data. Only include fields that are found or can be calculated.
 
 Example:
 {
-    "firstname": "John",
-    "email": "john@example.com",
-    "amount": "$1,250.00"
+    "client_name": "TechSolutions Inc",
+    "total_gross": 1180.0,
+    "total_mid_gross": 1280.0
 }
 
 Rules:
 - Only extract information explicitly present in the text
-- Omit fields that are not found
+- Calculate derived fields based on provided formulas
+- Omit fields that are not found or cannot be calculated
 - Return exact values as they appear (preserve formatting)
 - Return ONLY valid JSON, no additional text
 """

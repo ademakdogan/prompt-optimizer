@@ -55,57 +55,28 @@ class ExtractionSchema(BaseModel):
     """
 
     # Personal Information
-    firstname: Optional[str] = Field(
-        None, description="The first name of the person."
-    )
-    lastname: Optional[str] = Field(
-        None, description="The last name of the person."
-    )
-    prefix: Optional[str] = Field(
-        None, description="Honorifics or titles like Mr., Mrs., Dr."
-    )
-    age: Optional[str] = Field(
-        None, description="Age of the person."
-    )
-    eyecolor: Optional[str] = Field(
-        None, description="Eye color description."
-    )
-    jobtitle: Optional[str] = Field(
-        None, description="Job title or professional role."
-    )
-
-    # Contact Information
-    email: Optional[str] = Field(
-        None, description="Email address found in the text."
-    )
-    phonenumber: Optional[str] = Field(
-        None, description="Phone number contact."
-    )
-    street: Optional[str] = Field(
-        None, description="Street address or physical location."
-    )
-    county: Optional[str] = Field(
-        None, description="County or region name."
-    )
-
-    # Financial Information
-    accountnumber: Optional[str] = Field(
-        None, description="Bank or service account number."
-    )
-    amount: Optional[str] = Field(
-        None,
-        description="Monetary amount including currency symbol if present.",
-    )
-    currency: Optional[str] = Field(
-        None, description="Currency code like USD, EUR."
-    )
-    maskednumber: Optional[str] = Field(
-        None,
-        description="Partial or masked card/account numbers (e.g., last 4 digits).",
-    )
-    pin: Optional[str] = Field(
-        None, description="Personal Identification Number or security code."
-    )
+    #firstname: Optional[str] = Field(None, description="The first name of the person.")
+    #lastname: Optional[str] = Field(None, description="The last name of the person.")
+    #prefix: Optional[str] = Field(None, description="Honorifics or titles like Mr., Mrs., Dr.")
+    #age: Optional[str] = Field(None, description="Age of the person.")
+    #eyecolor: Optional[str] = Field(None, description="Eye color description.")
+    #jobtitle: Optional[str] = Field(None, description="Job title or professional role.")
+    ## Contact Information
+    #email: Optional[str] = Field(None, description="Email address found in the text.")
+    #phonenumber: Optional[str] = Field(None, description="Phone number contact.")
+    #street: Optional[str] = Field(None, description="Street address or physical location.")
+    #county: Optional[str] = Field(None, description="County or region name.")
+    ## Financial Information
+    #accountnumber: Optional[str] = Field(None, description="Bank or service account number.")
+    #amount: Optional[str] = Field(None, description="Monetary amount including currency symbol if present.")
+    #currency: Optional[str] = Field(None, description="Currency code like USD, EUR.")
+    #maskednumber: Optional[str] = Field(None, description="Partial or masked card/account numbers (e.g., last 4 digits).")
+    #pin: Optional[str] = Field(None, description="Personal Identification Number or security code.")
+    client_name: str
+    total_gross: float
+    total_mid_gross: float
+    net_payable: Optional[float] = None
+    currency_code: Optional[str] = None
 
 
 def generate_default_prompt(schema: Type[BaseModel] = ExtractionSchema) -> str:
