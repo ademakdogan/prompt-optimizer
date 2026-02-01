@@ -1,0 +1,587 @@
+
+================================================================================
+MENTOR PROMPT - IMPROVED
+Timestamp: 2026-01-14 02:05:12
+================================================================================
+
+[SYSTEM]
+Evaluate the provided source_text. It contains AI model predictions based on specific prompts. Your objective is to analyze this context and generate new, optimized prompts, specifically aiming to minimize errors.
+
+Your task is to improve the current prompt based on:
+1. The agent's incorrect predictions shown in the history
+2. Patterns in what the agent is missing or misidentifying
+3. Accuracy trends across iterations
+
+Generate an improved prompt that addresses these issues.
+
+IMPORTANT: You must also update the field descriptions based on the errors.
+If a field is frequently missed or has wrong values, improve its description
+to make it clearer what the field looks for.
+
+[USER]
+Analyze the agent's predictions and improve the prompt:
+
+CURRENT PROMPT:
+Extract the following information from the data:
+
+- client_name
+- total_gross
+- total_mid_gross
+- net_payable
+- currency_code
+
+Return the extracted information as a JSON object. Only include fields that are found in the text. Omit fields that are not present.
+
+ITERATION HISTORY (showing agent predictions vs ground truth):
+
+--- History 1 ---
+<prompt>
+Extract the following information from the data:
+
+- client_name
+- total_gross
+- total_mid_gross
+- net_payable
+- currency_code
+
+Return the extracted information as a JSON object. Only include fields that are found in the text. Omit fields that are not present.
+</prompt>
+prompt_accuracy: 38.3%
+
+Failed predictions:
+
+[
+  "source_text": ""name": 'TechSolutions Inc', "gross": 1000, "commission_rate": 0.1, "vat": 180",
+  "ground_truth": {"client_name": "TechSolutions Inc", "total_gross": 1180, "total_mid_gross": 1280},
+  "predict": {"client_name": "TechSolutions Inc", "total_gross": 1000}
+]
+
+[
+  "source_text": ""gross": 500, "vat": 50, "commission_rate": 0.2, "name": 'Creative Studio'",
+  "ground_truth": {"client_name": "Creative Studio", "total_gross": 550, "total_mid_gross": 650},
+  "predict": {"client_name": "Creative Studio", "total_gross": 500}
+]
+
+[
+  "source_text": ""name": 'Alpha Logistics', "gross": 2000.50, "vat": 360.09, "commission_rate": 0.05",
+  "ground_truth": {"client_name": "Alpha Logistics", "total_gross": 2360.59, "total_mid_gross": 2460.615},
+  "predict": {"client_name": "Alpha Logistics", "total_gross": 2000.5}
+]
+
+[
+  "source_text": ""commission_rate": 0.15, "name": 'Omega Retail', "gross": 100, "vat": 20, "deduction": 5",
+  "ground_truth": {"client_name": "Omega Retail", "total_gross": 120, "total_mid_gross": 135, "net_payable": 130},
+  "predict": {"client_name": "Omega Retail", "total_gross": 100}
+]
+
+[
+  "source_text": ""name": 'Freelancer John', "gross": 300, "vat": 0, "commission_rate": 0.1",
+  "ground_truth": {"client_name": "Freelancer John", "total_gross": 300, "total_mid_gross": 330},
+  "predict": {"client_name": "Freelancer John", "total_gross": 300}
+]
+
+
+CURRENT FIELD DESCRIPTIONS (update these based on errors):
+- client_name: 
+- total_gross: 
+- total_mid_gross: 
+- net_payable: 
+- currency_code: 
+
+
+The agent's predictions are shown above. Improve the prompt to help the agent
+produce better extractions. Be specific about what changes you're making and why.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - IMPROVED
+Timestamp: 2026-01-14 02:05:21
+================================================================================
+
+[SYSTEM]
+Evaluate the provided source_text. It contains AI model predictions based on specific prompts. Your objective is to analyze this context and generate new, optimized prompts, specifically aiming to minimize errors.
+
+Your task is to improve the current prompt based on:
+1. The agent's incorrect predictions shown in the history
+2. Patterns in what the agent is missing or misidentifying
+3. Accuracy trends across iterations
+
+Generate an improved prompt that addresses these issues.
+
+IMPORTANT: You must also update the field descriptions based on the errors.
+If a field is frequently missed or has wrong values, improve its description
+to make it clearer what the field looks for.
+
+[USER]
+Analyze the agent's predictions and improve the prompt:
+
+CURRENT PROMPT:
+Extract the following information from the data:
+
+- client_name: The name of the client.
+- total_gross: The total gross amount including any VAT.
+- total_mid_gross: The total gross amount plus commission.
+- net_payable: The final amount payable after all deductions.
+- currency_code: The currency code (e.g., USD, EUR).
+
+Return the extracted information as a JSON object. Only include fields that are found in the text. Omit fields that are not present.
+
+ITERATION HISTORY (showing agent predictions vs ground truth):
+
+--- History 1 ---
+<prompt>
+Extract the following information from the data:
+
+- client_name
+- total_gross
+- total_mid_gross
+- net_payable
+- currency_code
+
+Return the extracted information as a JSON object. Only include fields that are found in the text. Omit fields that are not present.
+</prompt>
+prompt_accuracy: 38.3%
+
+Failed predictions:
+
+[
+  "source_text": ""name": 'TechSolutions Inc', "gross": 1000, "commission_rate": 0.1, "vat": 180",
+  "ground_truth": {"client_name": "TechSolutions Inc", "total_gross": 1180, "total_mid_gross": 1280},
+  "predict": {"client_name": "TechSolutions Inc", "total_gross": 1000}
+]
+
+[
+  "source_text": ""gross": 500, "vat": 50, "commission_rate": 0.2, "name": 'Creative Studio'",
+  "ground_truth": {"client_name": "Creative Studio", "total_gross": 550, "total_mid_gross": 650},
+  "predict": {"client_name": "Creative Studio", "total_gross": 500}
+]
+
+[
+  "source_text": ""name": 'Alpha Logistics', "gross": 2000.50, "vat": 360.09, "commission_rate": 0.05",
+  "ground_truth": {"client_name": "Alpha Logistics", "total_gross": 2360.59, "total_mid_gross": 2460.615},
+  "predict": {"client_name": "Alpha Logistics", "total_gross": 2000.5}
+]
+
+[
+  "source_text": ""commission_rate": 0.15, "name": 'Omega Retail', "gross": 100, "vat": 20, "deduction": 5",
+  "ground_truth": {"client_name": "Omega Retail", "total_gross": 120, "total_mid_gross": 135, "net_payable": 130},
+  "predict": {"client_name": "Omega Retail", "total_gross": 100}
+]
+
+[
+  "source_text": ""name": 'Freelancer John', "gross": 300, "vat": 0, "commission_rate": 0.1",
+  "ground_truth": {"client_name": "Freelancer John", "total_gross": 300, "total_mid_gross": 330},
+  "predict": {"client_name": "Freelancer John", "total_gross": 300}
+]
+
+--- History 2 ---
+<prompt>
+Extract the following information from the data:
+
+- client_name: The name of the client.
+- total_gross: The total gross amount including any VAT.
+- total_mid_gross: The total gross amount plus commission.
+- net_payable: The final amount payable after all deductions.
+- currency_code: The currency code (e.g., USD, EUR).
+
+Return the extracted information as a JSON object. Only include fields that are found in the text. Omit fields that are not present.
+</prompt>
+prompt_accuracy: 38.3%
+
+Failed predictions:
+
+[
+  "source_text": ""name": 'TechSolutions Inc', "gross": 1000, "commission_rate": 0.1, "vat": 180",
+  "ground_truth": {"client_name": "TechSolutions Inc", "total_gross": 1180, "total_mid_gross": 1280},
+  "predict": {"client_name": "TechSolutions Inc", "total_gross": 1000}
+]
+
+[
+  "source_text": ""gross": 500, "vat": 50, "commission_rate": 0.2, "name": 'Creative Studio'",
+  "ground_truth": {"client_name": "Creative Studio", "total_gross": 550, "total_mid_gross": 650},
+  "predict": {"client_name": "Creative Studio", "total_gross": 500}
+]
+
+[
+  "source_text": ""name": 'Alpha Logistics', "gross": 2000.50, "vat": 360.09, "commission_rate": 0.05",
+  "ground_truth": {"client_name": "Alpha Logistics", "total_gross": 2360.59, "total_mid_gross": 2460.615},
+  "predict": {"client_name": "Alpha Logistics", "total_gross": 2000.5}
+]
+
+[
+  "source_text": ""commission_rate": 0.15, "name": 'Omega Retail', "gross": 100, "vat": 20, "deduction": 5",
+  "ground_truth": {"client_name": "Omega Retail", "total_gross": 120, "total_mid_gross": 135, "net_payable": 130},
+  "predict": {"client_name": "Omega Retail", "total_gross": 100}
+]
+
+[
+  "source_text": ""name": 'Freelancer John', "gross": 300, "vat": 0, "commission_rate": 0.1",
+  "ground_truth": {"client_name": "Freelancer John", "total_gross": 300, "total_mid_gross": 330},
+  "predict": {"client_name": "Freelancer John", "total_gross": 300}
+]
+
+
+CURRENT FIELD DESCRIPTIONS (update these based on errors):
+- client_name: 
+- total_gross: 
+- total_mid_gross: 
+- net_payable: 
+- currency_code: 
+
+
+The agent's predictions are shown above. Improve the prompt to help the agent
+produce better extractions. Be specific about what changes you're making and why.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - IMPROVED
+Timestamp: 2026-01-14 02:05:28
+================================================================================
+
+[SYSTEM]
+Evaluate the provided source_text. It contains AI model predictions based on specific prompts. Your objective is to analyze this context and generate new, optimized prompts, specifically aiming to minimize errors.
+
+Your task is to improve the current prompt based on:
+1. The agent's incorrect predictions shown in the history
+2. Patterns in what the agent is missing or misidentifying
+3. Accuracy trends across iterations
+
+Generate an improved prompt that addresses these issues.
+
+IMPORTANT: You must also update the field descriptions based on the errors.
+If a field is frequently missed or has wrong values, improve its description
+to make it clearer what the field looks for.
+
+[USER]
+Analyze the agent's predictions and improve the prompt:
+
+CURRENT PROMPT:
+Extract the following information from the data:
+
+- client_name: The name of the client.
+- total_gross: The total gross amount including any VAT. This should be calculated by summing the 'gross' and 'vat' fields if both are present.
+- total_mid_gross: The total gross amount plus commission. This should be calculated by summing 'total_gross' and the commission amount (commission_rate * gross).
+- net_payable: The final amount payable after all deductions. This should be calculated by subtracting any 'deduction' from 'total_mid_gross'.
+- currency_code: The currency code (e.g., USD, EUR).
+
+Return the extracted information as a JSON object. Only include fields that are found in the text or can be calculated from the provided fields. Omit fields that are not present or cannot be calculated.
+
+ITERATION HISTORY (showing agent predictions vs ground truth):
+
+--- History 2 ---
+<prompt>
+Extract the following information from the data:
+
+- client_name: The name of the client.
+- total_gross: The total gross amount including any VAT.
+- total_mid_gross: The total gross amount plus commission.
+- net_payable: The final amount payable after all deductions.
+- currency_code: The currency code (e.g., USD, EUR).
+
+Return the extracted information as a JSON object. Only include fields that are found in the text. Omit fields that are not present.
+</prompt>
+prompt_accuracy: 38.3%
+
+Failed predictions:
+
+[
+  "source_text": ""name": 'TechSolutions Inc', "gross": 1000, "commission_rate": 0.1, "vat": 180",
+  "ground_truth": {"client_name": "TechSolutions Inc", "total_gross": 1180, "total_mid_gross": 1280},
+  "predict": {"client_name": "TechSolutions Inc", "total_gross": 1000}
+]
+
+[
+  "source_text": ""gross": 500, "vat": 50, "commission_rate": 0.2, "name": 'Creative Studio'",
+  "ground_truth": {"client_name": "Creative Studio", "total_gross": 550, "total_mid_gross": 650},
+  "predict": {"client_name": "Creative Studio", "total_gross": 500}
+]
+
+[
+  "source_text": ""name": 'Alpha Logistics', "gross": 2000.50, "vat": 360.09, "commission_rate": 0.05",
+  "ground_truth": {"client_name": "Alpha Logistics", "total_gross": 2360.59, "total_mid_gross": 2460.615},
+  "predict": {"client_name": "Alpha Logistics", "total_gross": 2000.5}
+]
+
+[
+  "source_text": ""commission_rate": 0.15, "name": 'Omega Retail', "gross": 100, "vat": 20, "deduction": 5",
+  "ground_truth": {"client_name": "Omega Retail", "total_gross": 120, "total_mid_gross": 135, "net_payable": 130},
+  "predict": {"client_name": "Omega Retail", "total_gross": 100}
+]
+
+[
+  "source_text": ""name": 'Freelancer John', "gross": 300, "vat": 0, "commission_rate": 0.1",
+  "ground_truth": {"client_name": "Freelancer John", "total_gross": 300, "total_mid_gross": 330},
+  "predict": {"client_name": "Freelancer John", "total_gross": 300}
+]
+
+--- History 3 ---
+<prompt>
+Extract the following information from the data:
+
+- client_name: The name of the client.
+- total_gross: The total gross amount including any VAT. This should be calculated by summing the 'gross' and 'vat' fields if both are present.
+- total_mid_gross: The total gross amount plus commission. This should be calculated by summing 'total_gross' and the commission amount (commission_rate * gross).
+- net_payable: The final amount payable after all deductions. This should be calculated by subtracting any 'deduction' from 'total_mid_gross'.
+- currency_code: The currency code (e.g., USD, EUR).
+
+Return the extracted information as a JSON object. Only include fields that are found in the text or can be calculated from the provided fields. Omit fields that are not present or cannot be calculated.
+</prompt>
+prompt_accuracy: 93.3%
+
+Failed predictions:
+
+[
+  "source_text": ""name": 'TechSolutions Inc', "gross": 1000, "commission_rate": 0.1, "vat": 180",
+  "ground_truth": {"client_name": "TechSolutions Inc", "total_gross": 1180, "total_mid_gross": 1280},
+  "predict": {"client_name": "TechSolutions Inc", "total_gross": 1180, "total_mid_gross": 1280, "currency_code": "USD"}
+]
+
+[
+  "source_text": ""name": 'Alpha Logistics', "gross": 2000.50, "vat": 360.09, "commission_rate": 0.05",
+  "ground_truth": {"client_name": "Alpha Logistics", "total_gross": 2360.59, "total_mid_gross": 2460.615},
+  "predict": {"client_name": "Alpha Logistics", "total_gross": 2360.59, "total_mid_gross": 2460.62}
+]
+
+[
+  "source_text": ""name": 'Freelancer John', "gross": 300, "vat": 0, "commission_rate": 0.1",
+  "ground_truth": {"client_name": "Freelancer John", "total_gross": 300, "total_mid_gross": 330},
+  "predict": {"client_name": "Freelancer John", "total_gross": 300, "total_mid_gross": 330, "currency_code": "USD"}
+]
+
+
+CURRENT FIELD DESCRIPTIONS (update these based on errors):
+- client_name: 
+- total_gross: 
+- total_mid_gross: 
+- net_payable: 
+- currency_code: 
+
+
+The agent's predictions are shown above. Improve the prompt to help the agent
+produce better extractions. Be specific about what changes you're making and why.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - INITIAL
+Timestamp: 2026-01-14 02:09:44
+================================================================================
+
+[SYSTEM]
+Below, in source_text, you are provided with sample data and the desired values to be extracted from it. Generate a professional prompt designed to extract such data with high accuracy, following the provided example.
+
+Your goal is to create a clear, detailed prompt that will guide an AI assistant 
+to accurately extract structured information from text.
+
+The prompt should:
+1. Be specific about what types of data to look for
+2. Provide clear instructions on the output format (JSON)
+3. Include guidance on edge cases
+4. Be concise but comprehensive
+
+You must also provide descriptions for each field type to help
+the AI better understand what to extract.
+
+[USER]
+Create a professional prompt for data extraction based on this example:
+
+SAMPLE INPUT TEXT:
+Test data
+
+EXPECTED OUTPUT (ground truth):
+{
+  "firstname": "John"
+}
+
+
+Generate a prompt that would produce this expected output when given the sample input.
+Also provide descriptions for each field type that appears in the expected output.
+These descriptions should help the AI understand exactly what to look for.
+
+Explain your reasoning for the prompt design.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - IMPROVED
+Timestamp: 2026-01-14 02:09:44
+================================================================================
+
+[SYSTEM]
+Evaluate the provided source_text. It contains AI model predictions based on specific prompts. Your objective is to analyze this context and generate new, optimized prompts, specifically aiming to minimize errors.
+
+Your task is to improve the current prompt based on:
+1. The agent's incorrect predictions shown in the history
+2. Patterns in what the agent is missing or misidentifying
+3. Accuracy trends across iterations
+
+Generate an improved prompt that addresses these issues.
+
+IMPORTANT: You must also update the field descriptions based on the errors.
+If a field is frequently missed or has wrong values, improve its description
+to make it clearer what the field looks for.
+
+[USER]
+Analyze the agent's predictions and improve the prompt:
+
+CURRENT PROMPT:
+Original prompt
+
+ITERATION HISTORY (showing agent predictions vs ground truth):
+No previous iterations.
+
+
+The agent's predictions are shown above. Improve the prompt to help the agent
+produce better extractions. Be specific about what changes you're making and why.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - INITIAL
+Timestamp: 2026-01-14 02:11:18
+================================================================================
+
+[SYSTEM]
+Below, in source_text, you are provided with sample data and the desired values to be extracted from it. Generate a professional prompt designed to extract such data with high accuracy, following the provided example.
+
+Your goal is to create a clear, detailed prompt that will guide an AI assistant 
+to accurately extract structured information from text.
+
+The prompt should:
+1. Be specific about what types of data to look for
+2. Provide clear instructions on the output format (JSON)
+3. Include guidance on edge cases
+4. Be concise but comprehensive
+
+You must also provide descriptions for each field type to help
+the AI better understand what to extract.
+
+[USER]
+Create a professional prompt for data extraction based on this example:
+
+SAMPLE INPUT TEXT:
+Test data
+
+EXPECTED OUTPUT (ground truth):
+{
+  "firstname": "John"
+}
+
+
+Generate a prompt that would produce this expected output when given the sample input.
+Also provide descriptions for each field type that appears in the expected output.
+These descriptions should help the AI understand exactly what to look for.
+
+Explain your reasoning for the prompt design.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - IMPROVED
+Timestamp: 2026-01-14 02:11:18
+================================================================================
+
+[SYSTEM]
+Evaluate the provided source_text. It contains AI model predictions based on specific prompts. Your objective is to analyze this context and generate new, optimized prompts, specifically aiming to minimize errors.
+
+Your task is to improve the current prompt based on:
+1. The agent's incorrect predictions shown in the history
+2. Patterns in what the agent is missing or misidentifying
+3. Accuracy trends across iterations
+
+Generate an improved prompt that addresses these issues.
+
+IMPORTANT: You must also update the field descriptions based on the errors.
+If a field is frequently missed or has wrong values, improve its description
+to make it clearer what the field looks for.
+
+[USER]
+Analyze the agent's predictions and improve the prompt:
+
+CURRENT PROMPT:
+Original prompt
+
+ITERATION HISTORY (showing agent predictions vs ground truth):
+No previous iterations.
+
+
+The agent's predictions are shown above. Improve the prompt to help the agent
+produce better extractions. Be specific about what changes you're making and why.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - INITIAL
+Timestamp: 2026-01-14 02:11:47
+================================================================================
+
+[SYSTEM]
+Below, in source_text, you are provided with sample data and the desired values to be extracted from it. Generate a professional prompt designed to extract such data with high accuracy, following the provided example.
+
+Your goal is to create a clear, detailed prompt that will guide an AI assistant 
+to accurately extract structured information from text.
+
+The prompt should:
+1. Be specific about what types of data to look for
+2. Provide clear instructions on the output format (JSON)
+3. Include guidance on edge cases
+4. Be concise but comprehensive
+
+You must also provide descriptions for each field type to help
+the AI better understand what to extract.
+
+[USER]
+Create a professional prompt for data extraction based on this example:
+
+SAMPLE INPUT TEXT:
+Test data
+
+EXPECTED OUTPUT (ground truth):
+{
+  "firstname": "John"
+}
+
+
+Generate a prompt that would produce this expected output when given the sample input.
+Also provide descriptions for each field type that appears in the expected output.
+These descriptions should help the AI understand exactly what to look for.
+
+Explain your reasoning for the prompt design.
+
+================================================================================
+
+================================================================================
+MENTOR PROMPT - IMPROVED
+Timestamp: 2026-01-14 02:11:47
+================================================================================
+
+[SYSTEM]
+Evaluate the provided source_text. It contains AI model predictions based on specific prompts. Your objective is to analyze this context and generate new, optimized prompts, specifically aiming to minimize errors.
+
+Your task is to improve the current prompt based on:
+1. The agent's incorrect predictions shown in the history
+2. Patterns in what the agent is missing or misidentifying
+3. Accuracy trends across iterations
+
+Generate an improved prompt that addresses these issues.
+
+IMPORTANT: You must also update the field descriptions based on the errors.
+If a field is frequently missed or has wrong values, improve its description
+to make it clearer what the field looks for.
+
+[USER]
+Analyze the agent's predictions and improve the prompt:
+
+CURRENT PROMPT:
+Original prompt
+
+ITERATION HISTORY (showing agent predictions vs ground truth):
+No previous iterations.
+
+
+The agent's predictions are shown above. Improve the prompt to help the agent
+produce better extractions. Be specific about what changes you're making and why.
+
+================================================================================

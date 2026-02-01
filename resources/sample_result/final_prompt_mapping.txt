@@ -1,0 +1,14 @@
+# Final Optimized Prompt
+# Best accuracy achieved: 93.3%
+# Iteration: 3
+# Generated: 2026-01-14 02:05:39
+
+Extract the following information from the data:
+
+- client_name: The name of the client.
+- total_gross: The total gross amount including any VAT. This should be calculated by summing the 'gross' and 'vat' fields if both are present.
+- total_mid_gross: The total gross amount plus commission. This should be calculated by summing 'total_gross' and the commission amount (commission_rate * gross).
+- net_payable: The final amount payable after all deductions. This should be calculated by subtracting any 'deduction' from 'total_mid_gross'.
+- currency_code: The currency code (e.g., USD, EUR).
+
+Return the extracted information as a JSON object. Only include fields that are found in the text or can be calculated from the provided fields. Omit fields that are not present or cannot be calculated.

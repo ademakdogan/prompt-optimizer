@@ -1,14 +1,24 @@
 # Final Optimized Prompt
-# Best accuracy achieved: 93.3%
-# Iteration: 3
-# Generated: 2026-01-14 02:05:39
+# Best accuracy achieved: 100.0%
+# Iteration: 2
+# Generated: 2026-01-14 03:28:15
 
-Extract the following information from the data:
+Extract the following information from the data and compute derived fields when needed:
 
-- client_name: The name of the client.
-- total_gross: The total gross amount including any VAT. This should be calculated by summing the 'gross' and 'vat' fields if both are present.
-- total_mid_gross: The total gross amount plus commission. This should be calculated by summing 'total_gross' and the commission amount (commission_rate * gross).
-- net_payable: The final amount payable after all deductions. This should be calculated by subtracting any 'deduction' from 'total_mid_gross'.
-- currency_code: The currency code (e.g., USD, EUR).
+Required output: a single JSON object with any of these fields found or computed:
+- client_name: exact client name string (look for keys like name, client, client_name). Trim surrounding quotes and whitespace.
+- total_gross: numeric value computed as gross + vat. If both gross and vat are present, compute total_gross = gross + vat. If only a precomputed total_gross is present in the text, use that value. Always return a number (use decimals when needed).
+- total_mid_gross: numeric value computed as total_gross + (gross * commission_rate). If commission_rate is missing, assume 0. If gross is missing but total_mid_gross is present, use provided value. If gross present but commission_rate missing, treat commission_rate as 0.
+- net_payable: numeric value computed as total_mid_gross - deduction (if deduction present). If deduction is missing and net_payable is present, use provided value. If deduction present but total_mid_gross must be computed first, compute it using rules above.
+- currency_code: 3-letter currency code (ISO 4217) if explicitly present, or infer from currency symbols (e.g., $ -> USD, € -> EUR, £ -> GBP) or explicit word (e.g., 'USD').
 
-Return the extracted information as a JSON object. Only include fields that are found in the text or can be calculated from the provided fields. Omit fields that are not present or cannot be calculated.
+Rules and details:
+1. Identify numeric inputs by keys: gross, vat, commission_rate (or commission), deduction, net_payable, total_gross, total_mid_gross. Values may be integers or decimals. commission_rate is a proportion (e.g., 0.1 for 10%).
+2. Calculations must be precise: do arithmetic using the numeric inputs exactly as given and return decimal results (do not round unless the source shows rounded values). Keep up to at least 3-6 decimal places if necessary.
+3. If a field can be computed from available values, compute and return it even if not explicitly stated in the text.
+4. Only include fields in the JSON that you can extract or compute from the provided source text. Omit fields that cannot be determined.
+5. For client_name, prefer the value from keys named name, client_name, client, or labeled strings. Strip surrounding quotes.
+6. For commission_rate, if the text gives a percent like '15%' convert to decimal 0.15.
+7. If conflicting values are present (e.g., both total_gross and gross+vat available and they differ), prefer explicitly provided total fields but flag the discrepancy by choosing the explicit value. (Note: in final JSON, only include fields; do not include flags.)
+
+Return only the JSON object as the final output with appropriate numeric types and strings where applicable.
