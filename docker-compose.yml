@@ -1,0 +1,56 @@
+services:
+  prompt-optimizer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: prompt-optimizer
+    env_file:
+      - .env
+    volumes:
+      # Mount resources for custom datasets
+      - ./resources:/app/resources:ro
+      # Mount output directory for results
+      - ./output:/app/output
+      # Mount output files to project root
+      - ./final_prompt.txt:/app/final_prompt.txt
+      - ./mentor_prompts.txt:/app/mentor_prompts.txt
+    working_dir: /app
+    # Override default command for interactive use
+    command: ["python", "-m", "prompt_optimizer", "--help"]
+    
+  # Service for running optimization
+  optimize:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: prompt-optimizer-run
+    env_file:
+      - .env
+    volumes:
+      - ./resources:/app/resources:ro
+      - ./output:/app/output
+      - ./final_prompt.txt:/app/final_prompt.txt
+      - ./mentor_prompts.txt:/app/mentor_prompts.txt
+    working_dir: /app
+    command: >
+      python -m prompt_optimizer 
+      --data resources/test_mapping.json 
+      --samples 5 
+      --loops 3
+    profiles:
+      - run
+
+  # Service for running tests
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    container_name: prompt-optimizer-test
+    volumes:
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+      - ./resources:/app/resources:ro
+    working_dir: /app
+    command: ["pytest", "tests/", "-v", "--tb=short"]
+    profiles:
+      - test

@@ -2,7 +2,7 @@
 
 **Stop struggling with prompt engineering. Let AI optimize your prompts automatically.**
 
-Do you have labeled data but don't want to spend hours crafting the perfect extraction prompt? Or maybe you have an existing prompt that works "okay" but you know it could be better? 
+Generate accurate extraction prompts directly from your labeled data. Improve your existing prompts and eliminate manual fine-tuning.
 
 **Prompt Optimizer** uses a mentor-agent architecture to automatically generate, refine, and optimize prompts for your specific use case. Simply provide your labeled examples, define your output schema, and let the system discover the optimal prompt through iterative learning.
 
@@ -42,26 +42,49 @@ Do you have labeled data but don't want to spend hours crafting the perfect extr
 
 ## Quick Start
 
-### 1. Install
+### Option 1: Local Installation
 
 ```bash
+# Clone and install
 git clone https://github.com/yourusername/prompt-optimizer.git
 cd prompt-optimizer
 uv sync --all-extras
+
+# Configure
+echo "OPENROUTER_API_KEY=your-api-key" > .env
+
+# Run
+uv run python -m prompt_optimizer --data resources/test_mapping.json --samples 5
 ```
 
-### 2. Configure
-
-Create a `.env` file:
-
-```env
-OPENROUTER_API_KEY=your-api-key-here
-```
-
-### 3. Run
+### Option 2: Docker
 
 ```bash
-uv run python -m prompt_optimizer --data resources/test_mapping.json --samples 5
+# Clone and configure
+git clone https://github.com/yourusername/prompt-optimizer.git
+cd prompt-optimizer
+echo "OPENROUTER_API_KEY=your-api-key" > .env
+
+# Build and run
+make build
+make optimize DATA=resources/test_mapping.json SAMPLES=5 LOOPS=3
+```
+
+### Makefile Commands
+
+| Command | Description |
+|---------|-------------|
+| `make build` | Build Docker image |
+| `make run` | Run container (shows help) |
+| `make optimize` | Run optimization with defaults |
+| `make test` | Run tests in Docker |
+| `make shell` | Open shell in container |
+| `make clean` | Remove container and image |
+| `make help` | Show all available commands |
+
+**Custom optimization:**
+```bash
+make optimize DATA=resources/my_data.json SAMPLES=10 LOOPS=5
 ```
 
 ---
