@@ -4,9 +4,7 @@
 # Quick commands for Docker operations and local development
 # ============================================================================
 
-.PHONY: help build run stop clean logs shell test test-local optimize \
-        docker-build docker-run docker-stop docker-clean docker-logs \
-        docker-shell docker-test docker-optimize rebuild
+.PHONY: help build run stop clean logs shell test optimize rebuild install format lint
 
 # Default target
 help:
@@ -25,8 +23,7 @@ help:
 	@echo "║    make rebuild        - Clean, rebuild, and run             ║"
 	@echo "║                                                              ║"
 	@echo "║  Testing:                                                    ║"
-	@echo "║    make test           - Run tests in Docker                 ║"
-	@echo "║    make test-local     - Run tests locally with uv           ║"
+	@echo "║    make test           - Run tests locally with uv           ║"
 	@echo "║                                                              ║"
 	@echo "║  Custom Optimization:                                        ║"
 	@echo "║    make optimize DATA=path/to/data.json SAMPLES=10 LOOPS=5   ║"
@@ -51,11 +48,6 @@ PROMPT ?=
 build:
 	@echo "🔨 Building Docker image..."
 	docker build -t $(IMAGE_NAME) .
-
-# Build test image
-build-test:
-	@echo "🔨 Building test Docker image..."
-	docker build -f Dockerfile.test -t $(IMAGE_NAME)-test .
 
 # Run the container (shows help by default)
 run: build
@@ -96,16 +88,13 @@ stop:
 	@echo "🛑 Stopping container..."
 	-docker stop $(CONTAINER_NAME) 2>/dev/null || true
 	-docker stop $(CONTAINER_NAME)-run 2>/dev/null || true
-	-docker stop $(CONTAINER_NAME)-test 2>/dev/null || true
 
 # Remove container and image
 clean: stop
 	@echo "🧹 Cleaning up..."
 	-docker rm $(CONTAINER_NAME) 2>/dev/null || true
 	-docker rm $(CONTAINER_NAME)-run 2>/dev/null || true
-	-docker rm $(CONTAINER_NAME)-test 2>/dev/null || true
 	-docker rmi $(IMAGE_NAME) 2>/dev/null || true
-	-docker rmi $(IMAGE_NAME)-test 2>/dev/null || true
 	@echo "✅ Cleanup complete"
 
 # Show container logs
@@ -128,25 +117,13 @@ rebuild: clean build
 	@echo "✅ Rebuild complete"
 
 # ============================================================================
-# Testing Commands
+# Testing & Development
 # ============================================================================
-
-# Run tests in Docker
-test: build-test
-	@echo "🧪 Running tests in Docker..."
-	docker run --rm \
-		--name $(CONTAINER_NAME)-test \
-		$(IMAGE_NAME)-test \
-		python -m pytest tests/ -v --tb=short
 
 # Run tests locally with uv
-test-local:
-	@echo "🧪 Running tests locally..."
+test:
+	@echo "🧪 Running tests..."
 	uv run pytest tests/ -v --tb=short
-
-# ============================================================================
-# Development Commands
-# ============================================================================
 
 # Install dependencies locally
 install:
@@ -160,12 +137,8 @@ format:
 lint:
 	uv run ruff check src/ tests/
 
-# Run type checking
-typecheck:
-	uv run mypy src/
-
 # ============================================================================
-# Docker Compose Commands (alternative to direct docker commands)
+# Docker Compose Commands
 # ============================================================================
 
 compose-build:
@@ -179,9 +152,6 @@ compose-down:
 
 compose-logs:
 	docker compose logs -f
-
-compose-test:
-	docker compose --profile test run --rm test
 
 compose-optimize:
 	docker compose --profile run run --rm optimize
