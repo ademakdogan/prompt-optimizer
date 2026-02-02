@@ -1,21 +1,34 @@
 # Prompt Optimizer
 
-**Stop struggling with prompt engineering. Let AI optimize your prompts automatically.**
+<p align="center">
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.13+-blue.svg?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.13+"></a>
+  <a href="https://github.com/ademakdogan/prompt-optimizer/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge" alt="License: MIT"></a>
+  <a href="https://openrouter.ai/"><img src="https://img.shields.io/badge/OpenRouter-Powered-orange.svg?style=for-the-badge" alt="OpenRouter"></a>
+  <a href="https://github.com/ademakdogan/prompt-optimizer/issues"><img src="https://img.shields.io/github/issues/ademakdogan/prompt-optimizer?style=for-the-badge&logo=github" alt="GitHub Issues"></a>
+</p>
+
+<p align="center">
+  <strong>🚀 Stop struggling with prompt engineering. Let AI optimize your prompts automatically.</strong>
+</p>
+
+---
 
 Generate accurate extraction prompts directly from your labeled data. Improve your existing prompts and eliminate manual fine-tuning.
 
 **Prompt Optimizer** uses a mentor-agent architecture to automatically generate, refine, and optimize prompts for your specific use case. Simply provide your labeled examples, define your output schema, and let the system discover the optimal prompt through iterative learning.
 
-### Why Use This?
+## ✨ Why Use This?
 
-- 🎯 **Automatic Prompt Discovery**: Don't know where to start? The system generates an initial prompt based on your data
-- 📈 **Continuous Improvement**: Each iteration learns from mistakes and produces better prompts
-- ⚡ **Token Efficiency**: When accuracy is tied, the shortest (cheapest) prompt wins
-- 🔄 **Works for Any Domain**: From NER to calculations, entity extraction to data transformation
+| Feature | Description |
+|---------|-------------|
+| 🎯 **Automatic Prompt Discovery** | Don't know where to start? The system generates an initial prompt based on your data |
+| 📈 **Continuous Improvement** | Each iteration learns from mistakes and produces better prompts |
+| ⚡ **Token Efficiency** | When accuracy is tied, the shortest (cheapest) prompt wins |
+| 🔄 **Works for Any Domain** | From NER to calculations, entity extraction to data transformation |
 
 ---
 
-## How It Works
+## 🔧 How It Works
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -40,13 +53,13 @@ Generate accurate extraction prompts directly from your labeled data. Improve yo
 
 ---
 
-## Quick Start
+## 🚀 Quick Start
 
 ### Option 1: Local Installation
 
 ```bash
 # Clone and install
-git clone https://github.com/yourusername/prompt-optimizer.git
+git clone https://github.com/ademakdogan/prompt-optimizer.git
 cd prompt-optimizer
 uv sync --all-extras
 
@@ -61,7 +74,7 @@ uv run python -m prompt_optimizer --data resources/test_mapping.json --samples 5
 
 ```bash
 # Clone and configure
-git clone https://github.com/yourusername/prompt-optimizer.git
+git clone https://github.com/ademakdogan/prompt-optimizer.git
 cd prompt-optimizer
 echo "OPENROUTER_API_KEY=your-api-key" > .env
 
@@ -89,7 +102,7 @@ make optimize DATA=resources/my_data.json SAMPLES=10 LOOPS=5
 
 ---
 
-## Example Datasets
+## 📁 Example Datasets
 
 The project includes two example datasets demonstrating different problem types:
 
@@ -141,7 +154,7 @@ This dataset demonstrates **data transformation** where the AI must not only ext
 
 ---
 
-## How to Use with Your Own Data
+## 📝 How to Use with Your Own Data
 
 ### Step 1: Prepare Your Dataset
 
@@ -200,7 +213,7 @@ After optimization completes, find your prompt in:
 
 ---
 
-## Configuration
+## ⚙️ Configuration
 
 ### Environment Variables
 
@@ -227,7 +240,7 @@ After optimization completes, find your prompt in:
 
 ---
 
-## Python API
+## 🐍 Python API
 
 ```python
 from prompt_optimizer.core import PromptOptimizer
@@ -254,7 +267,7 @@ results = optimizer.optimize(data=data, initial_prompt=my_prompt)
 
 ---
 
-## Optimization Metrics
+## 📊 Optimization Metrics
 
 After each run, you'll see a detailed metrics table:
 
@@ -288,7 +301,7 @@ When multiple iterations achieve the same accuracy, the optimizer automatically 
 
 ---
 
-## Project Structure
+## 📂 Project Structure
 
 ```
 prompt-optimizer/
@@ -309,7 +322,7 @@ prompt-optimizer/
 
 ---
 
-## Testing
+## 🧪 Testing
 
 ```bash
 # Run all tests
@@ -321,7 +334,7 @@ uv run pytest tests/ --cov=prompt_optimizer --cov-report=html
 
 ---
 
-## Supported Models
+## 🤖 Supported Models
 
 Any model on OpenRouter can be used:
 
@@ -334,6 +347,6 @@ Any model on OpenRouter can be used:
 
 ---
 
-## License
+## 📄 License
 
-MIT
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
